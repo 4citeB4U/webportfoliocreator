@@ -129,7 +129,7 @@ export default function VoiceInterface({ onMessage }: Props) {
     return () => {
       recognition.stop();
     };
-  }, [isListening, isSpeakingRef.current]);
+  }, [isListening]);
 
   // Function to speak a single chunk of text
   const speakChunk = async (chunk: string, voice: SpeechSynthesisVoice): Promise<void> => {
@@ -280,7 +280,6 @@ export default function VoiceInterface({ onMessage }: Props) {
   };
 
   const handleSelectChat = (chat: any) => {
-    // Load the selected chat into the current conversation
     setCurrentConversation(chat.messages);
     setShowHistory(false);
     conversationId.current = chat.id;
