@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Lee AI</title>
+    <!-- Particle.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: black;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize particles
+            particlesJS('particles-js', {
+                particles: {
+                    number: {
+                        value: 80,
+                        density: {
+                            enable: true,
+                            value_area: 800
+                        }
+                    },
+                    color: {
+                        value: ["#00ffff", "#ff00ff", "#00ff00", "#ff0000", "#0000ff"]
+                    },
+                    shape: {
+                        type: "circle"
+                    },
+                    opacity: {
+                        value: 0.5,
+                        random: false,
+                        anim: {
+                            enable: true,
+                            speed: 1,
+                            opacity_min: 0.2,
+                            sync: false
+                        }
+                    },
+                    size: {
+                        value: 3,
+                        random: true,
+                        anim: {
+                            enable: true,
+                            speed: 2,
+                            size_min: 1,
+                            sync: false
+                        }
+                    },
+                    line_linked: {
+                        enable: true,
+                        distance: 150,
+                        color: "#00ffff",
+                        opacity: 0.4,
+                        width: 1,
+                        color_rgb_line: true  // Enable color inheritance for lines
+                    },
+                    move: {
+                        enable: true,
+                        speed: 2,
+                        direction: "none",
+                        random: false,
+                        straight: false,
+                        out_mode: "out",
+                        bounce: false,
+                        attract: {
+                            enable: false,
+                            rotateX: 600,
+                            rotateY: 1200
+                        }
+                    }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: {
+                        onhover: {
+                            enable: true,
+                            mode: "grab"
+                        },
+                        onclick: {
+                            enable: true,
+                            mode: "push"
+                        },
+                        resize: true
+                    },
+                    modes: {
+                        grab: {
+                            distance: 140,
+                            line_linked: {
+                                opacity: 1
+                            }
+                        },
+                        push: {
+                            particles_nb: 4
+                        }
+                    }
+                },
+                retina_detect: true
+            });
+
+            // Color animation
+            function updateColors() {
+                const particles = window.pJSDom[0].pJS.particles;
+                const colors = ["#00ffff", "#ff00ff", "#00ff00", "#ff0000", "#0000ff"];
+                let currentIndex = 0;
+
+                setInterval(() => {
+                    currentIndex = (currentIndex + 1) % colors.length;
+                    particles.array.forEach(p => {
+                        p.color.value = colors[Math.floor(Math.random() * colors.length)];
+                    });
+                    particles.line_linked.color = colors[currentIndex];
+                }, 3000); // Change colors every 3 seconds
+            }
+
+            // Start color animation after particles are initialized
+            setTimeout(updateColors, 1000);
+        });
+    </script>
+</body>
+</html>

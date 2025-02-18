@@ -1,0 +1,88 @@
+Continuing from the previous implementation, here's how you can handle both interim and final speech recognition results in a React component using the Web Speech API:
+
+```javascript
+// SpeechRecognitionComponent.jsx
+import React, { useState, useEffect } from 'react';
+
+const SpeechRecognitionComponent = () => {
+  const [transcript, setTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setError('Web Speech API is not supported in this browser.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      let final = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      setTranscript((prev) => prev + final);
+      setInterimTranscript(interim);
+    };
+
+    recognition.onerror = (event) => {
+      setError(`Speech recognition error: ${event.error}`);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    if (isListening) {
+      recognition.start();
+    } else {
+      recognition.stop();
+    }
+
+    return () => {
+      recognition.stop();
+    };
+  }, [isListening]);
+
+  return (
+    <div>
+      {error && <p>Error: {error}</p>}
+      <button onClick={() => setIsListening((prev) => !prev)}>
+        {isListening ? 'Stop Listening' : 'Start Listening'}
+      </button>
+      <p>Interim Transcript: {interimTranscript}</p>
+      <p>Final Transcript: {transcript}</p>
+    </div>
+  );
+};
+
+export default SpeechRecognitionComponent;
+```
+
+**Explanation:**
+
+- **Interim and Final Transcripts:** The `onresult` event handler processes both interim and final results. Interim results are updated in real-time, providing immediate feedback to the user, while final results are appended to the main transcript once confirmed.
+
+- **State Management:** The component maintains separate states for the interim transcript (`interimTranscript`) and the final transcript (`transcript`). This distinction allows for a clear display of what the user is currently saying versus what has been finalized.
+
+- **Error Handling:** The `onerror` event handler captures any errors that occur during speech recognition and updates the `error` state accordingly.
+
+- **Lifecycle Management:** The `useEffect` hook manages the initialization and cleanup of the `SpeechRecognition` instance based on the `isListening` state.
+
+By implementing this component, you can effectively handle both interim and final speech recognition results, providing users with real-time feedback as they speak.
+
+For a visual demonstration and further insights into building voice-enabled React applications using the Web Speech API, you might find the following tutorial helpful:
+
+videoBuilding Voice-Enabled React Apps with Web Speech APIturn0search9 
