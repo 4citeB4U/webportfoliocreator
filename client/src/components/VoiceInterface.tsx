@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, Send, Square, Volume2, Save } from 'lucide-react';
+import { Mic, Send, Square } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { getBusinessAdvice } from '@/lib/openai';
@@ -20,27 +20,33 @@ export default function VoiceInterface({ onMessage }: Props) {
   const { toast } = useToast();
   const synth = window.speechSynthesis;
   const queryClient = useQueryClient();
+  const conversationId = useRef<number | null>(null);
 
   const saveChatMutation = useMutation({
     mutationFn: async (messages: typeof currentConversation) => {
-      return await apiRequest("POST", "/api/chats", {
+      const endpoint = conversationId.current ? 
+        `/api/chats/${conversationId.current}` : 
+        "/api/chats";
+
+      const method = conversationId.current ? "PATCH" : "POST";
+
+      const response = await apiRequest(method, endpoint, {
         title: messages[0]?.content.substring(0, 50) + "...",
         messages
       });
+
+      if (!conversationId.current) {
+        const chat = await response.json();
+        conversationId.current = chat.id;
+      }
+
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
-      toast({
-        title: "Conversation saved",
-        description: "You can access this conversation in your chat history.",
-      });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Failed to save conversation",
-        description: error.message,
-        variant: "destructive"
-      });
+      console.error('Failed to save conversation:', error);
     }
   });
 
@@ -117,13 +123,23 @@ export default function VoiceInterface({ onMessage }: Props) {
 
     const userMessage = { role: 'user' as const, content: inputText };
     onMessage(userMessage);
-    setCurrentConversation(prev => [...prev, userMessage]);
+
+    const updatedConversation = [...currentConversation, userMessage];
+    setCurrentConversation(updatedConversation);
+
+    // Automatically save after user message
+    await saveChatMutation.mutateAsync(updatedConversation);
 
     try {
-      const response = await getBusinessAdvice(inputText, currentConversation);
+      const response = await getBusinessAdvice(inputText, updatedConversation);
       const assistantMessage = { role: 'assistant' as const, content: response.content };
       onMessage(assistantMessage);
-      setCurrentConversation(prev => [...prev, assistantMessage]);
+
+      const finalConversation = [...updatedConversation, assistantMessage];
+      setCurrentConversation(finalConversation);
+
+      // Automatically save after AI response
+      await saveChatMutation.mutateAsync(finalConversation);
 
       // Speak the response
       await speakText(response.content);
@@ -142,19 +158,6 @@ export default function VoiceInterface({ onMessage }: Props) {
   const handleStopSpeaking = () => {
     synth.cancel();
     setIsSpeaking(false);
-  };
-
-  const handleSaveConversation = () => {
-    if (currentConversation.length === 0) {
-      toast({
-        title: "No conversation to save",
-        description: "Have a conversation first before saving.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    saveChatMutation.mutate(currentConversation);
   };
 
   return (
@@ -198,14 +201,6 @@ export default function VoiceInterface({ onMessage }: Props) {
           title="Send Message"
         >
           <Send className="h-6 w-6" />
-        </Button>
-
-        <Button
-          onClick={handleSaveConversation}
-          className="w-12 h-12 bg-cyan-500 hover:bg-cyan-600 text-white border-none"
-          title="Save Conversation"
-        >
-          <Save className="h-6 w-6" />
         </Button>
       </div>
 

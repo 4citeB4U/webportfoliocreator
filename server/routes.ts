@@ -8,7 +8,7 @@ export async function registerRoutes(app: Express) {
   // Set up authentication routes (/api/register, /api/login, /api/logout, /api/user)
   setupAuth(app);
 
-  // Save chat
+  // Create new chat
   app.post("/api/chats", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: "Not authenticated" });
@@ -36,8 +36,40 @@ export async function registerRoutes(app: Express) {
       });
 
       res.json(chat);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Update existing chat
+  app.patch("/api/chats/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    try {
+      const chatId = parseInt(req.params.id);
+      const chat = await storage.getChat(chatId);
+
+      if (!chat) {
+        return res.status(404).json({ error: "Chat not found" });
+      }
+
+      if (chat.userId !== req.user.id) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const updatedChat = await storage.updateChat(chatId, {
+        ...req.body,
+        messages: req.body.messages.map((msg: any) => ({
+          ...msg,
+          timestamp: msg.timestamp || new Date().toISOString()
+        }))
+      });
+
+      res.json(updatedChat);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 
@@ -52,7 +84,7 @@ export async function registerRoutes(app: Express) {
       const limit = parseInt(req.query.limit as string) || 10;
       const chats = await storage.getChatsByUserId(req.user.id, page, limit);
       res.json(chats);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   });
@@ -74,7 +106,7 @@ export async function registerRoutes(app: Express) {
       }
 
       res.json(chat);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   });
