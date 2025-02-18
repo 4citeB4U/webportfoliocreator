@@ -36,11 +36,17 @@ export default function VoiceInterface({ onMessage }: Props) {
       const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
       if (englishVoices.length > 0) {
         // Prefer Microsoft voices if available
-        const microsoftVoice = englishVoices.find(v => 
-          v.name.includes('Microsoft') || v.name.includes('Google')
-        );
-        selectedVoiceRef.current = microsoftVoice || englishVoices[0];
-        console.log('Selected voice:', selectedVoiceRef.current?.name);
+        const microsoftAndrew = englishVoices.find(v => v.name === 'Microsoft Andrew Online (Natural) - English (United States)');
+        if (microsoftAndrew) {
+          console.log('Found Microsoft Andrew Online voice:', microsoftAndrew.name);
+          selectedVoiceRef.current = microsoftAndrew;
+        } else {
+          console.log('Available voices:', englishVoices.map(v => v.name).join(', '));
+          // Fallback to first English voice if Microsoft Andrew is not available
+          const defaultVoice = englishVoices[0];
+          selectedVoiceRef.current = defaultVoice;
+          console.log('Using voice:', defaultVoice.name);
+        }
       }
     };
 
@@ -135,6 +141,7 @@ export default function VoiceInterface({ onMessage }: Props) {
       currentUtteranceRef.current = utterance;
 
       utterance.onend = () => {
+        console.log('Finished speaking chunk:', chunk);
         currentUtteranceRef.current = null;
         resolve();
       };
@@ -164,11 +171,13 @@ export default function VoiceInterface({ onMessage }: Props) {
     try {
       console.log('Starting to speak with voice:', selectedVoiceRef.current.name);
 
-      // Split text into sentences, then further split long sentences
+      // Split text into sentences
       const sentences = text.split(/[.!?]+/).filter(Boolean);
 
       for (const sentence of sentences) {
         if (!isSpeakingRef.current) break;
+
+        console.log('Speaking sentence:', sentence);
 
         // Split long sentences at commas
         const chunks = sentence.length > 100 
@@ -182,7 +191,7 @@ export default function VoiceInterface({ onMessage }: Props) {
 
           // Small pause between chunks
           if (isSpeakingRef.current) {
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await new Promise(resolve => setTimeout(resolve, 200));
           }
         }
       }
@@ -251,6 +260,7 @@ export default function VoiceInterface({ onMessage }: Props) {
 
   const handleRepeatLast = async () => {
     if (lastResponse) {
+      console.log('Repeating last response:', lastResponse);
       await speakText(lastResponse);
     } else {
       toast({
