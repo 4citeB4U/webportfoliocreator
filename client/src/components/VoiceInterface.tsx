@@ -105,16 +105,16 @@ export default function VoiceInterface({ onMessage }: Props) {
     recognition.interimResults = true;
 
     recognition.onresult = (event) => {
+      if (isSpeakingRef.current) {
+        // Don't process results while AI is speaking
+        return;
+      }
+
       const transcript = Array.from(event.results)
         .map(result => result[0].transcript)
         .join('');
       setTranscript(transcript);
       setInputText(transcript);
-
-      // Check for stop command
-      if (transcript.toLowerCase().includes('stop talking')) {
-        handleStopSpeaking();
-      }
     };
 
     recognition.onerror = (event) => {
@@ -122,14 +122,14 @@ export default function VoiceInterface({ onMessage }: Props) {
       setIsListening(false);
     };
 
-    if (isListening) {
+    if (isListening && !isSpeakingRef.current) {
       recognition.start();
     }
 
     return () => {
       recognition.stop();
     };
-  }, [isListening]);
+  }, [isListening, isSpeakingRef.current]);
 
   // Function to speak a single chunk of text
   const speakChunk = async (chunk: string, voice: SpeechSynthesisVoice): Promise<void> => {
@@ -162,14 +162,15 @@ export default function VoiceInterface({ onMessage }: Props) {
       return;
     }
 
-    // Cancel any ongoing speech
+    // Cancel any ongoing speech and recording
     handleStopSpeaking();
+    setIsListening(false);
 
     setIsSpeaking(true);
     isSpeakingRef.current = true;
 
     try {
-      console.log('Starting to speak with voice:', selectedVoiceRef.current.name);
+      console.log('Started speaking with voice:', selectedVoiceRef.current.name);
 
       // Split text into sentences
       const sentences = text.split(/[.!?]+/).filter(Boolean);
@@ -206,6 +207,13 @@ export default function VoiceInterface({ onMessage }: Props) {
       setIsSpeaking(false);
       isSpeakingRef.current = false;
       currentUtteranceRef.current = null;
+
+      // Start listening after speaking is complete
+      setTimeout(() => {
+        if (!isSpeakingRef.current) {
+          setIsListening(true);
+        }
+      }, 500);
     }
   };
 
@@ -291,6 +299,7 @@ export default function VoiceInterface({ onMessage }: Props) {
               : 'bg-green-500 hover:bg-green-600 text-white border-none'
           }`}
           title={isListening ? "Stop Voice Input" : "Start Voice Input"}
+          disabled={isSpeakingRef.current}
         >
           <Mic className="h-6 w-6" />
         </Button>
