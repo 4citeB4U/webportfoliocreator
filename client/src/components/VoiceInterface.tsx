@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, Send, Square } from 'lucide-react';
+import { Mic, Send, Square, History, Repeat } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { getBusinessAdvice } from '@/lib/openai';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ChatHistory } from '@/components/ChatHistory';
 
 interface Props {
   onMessage: (message: { role: 'user' | 'assistant'; content: string }) => void;
@@ -17,10 +19,13 @@ export default function VoiceInterface({ onMessage }: Props) {
   const [transcript, setTranscript] = useState('');
   const [inputText, setInputText] = useState('');
   const [currentConversation, setCurrentConversation] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [lastResponse, setLastResponse] = useState<string | null>(null);
   const { toast } = useToast();
   const synth = window.speechSynthesis;
   const queryClient = useQueryClient();
   const conversationId = useRef<number | null>(null);
+  const isSpeakingRef = useRef(false);
 
   const saveChatMutation = useMutation({
     mutationFn: async (messages: typeof currentConversation) => {
@@ -74,8 +79,7 @@ export default function VoiceInterface({ onMessage }: Props) {
 
       // Check for stop command
       if (transcript.toLowerCase().includes('stop talking')) {
-        synth.cancel();
-        setIsSpeaking(false);
+        handleStopSpeaking();
       }
     };
 
@@ -99,23 +103,37 @@ export default function VoiceInterface({ onMessage }: Props) {
     }
 
     setIsSpeaking(true);
-    const utterance = new SpeechSynthesisUtterance(text);
+    isSpeakingRef.current = true;
 
-    utterance.onend = () => {
-      setIsSpeaking(false);
-    };
-
-    // Split text into manageable chunks for continuous speech
-    const chunks = text.match(/[^.!?]+[.!?]+/g) || [text];
+    // Create smaller chunks for better synchronization
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+    const chunks = sentences.reduce((acc: string[], sentence) => {
+      // Split long sentences into smaller parts at commas or natural breaks
+      if (sentence.length > 100) {
+        const parts = sentence.split(/,(?=\s)/);
+        return [...acc, ...parts];
+      }
+      return [...acc, sentence];
+    }, []);
 
     for (const chunk of chunks) {
-      if (!isSpeaking) break;
-      const chunkUtterance = new SpeechSynthesisUtterance(chunk);
-      await new Promise(resolve => {
-        chunkUtterance.onend = resolve;
-        synth.speak(chunkUtterance);
+      if (!isSpeakingRef.current) break;
+
+      const utterance = new SpeechSynthesisUtterance(chunk.trim());
+      utterance.rate = 0.9; // Slightly slower rate for better clarity
+      utterance.pitch = 1.0;
+
+      await new Promise<void>((resolve) => {
+        utterance.onend = () => resolve();
+        synth.speak(utterance);
       });
+
+      // Small pause between chunks for natural rhythm
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
+
+    setIsSpeaking(false);
+    isSpeakingRef.current = false;
   };
 
   const handleSubmit = async () => {
@@ -137,6 +155,7 @@ export default function VoiceInterface({ onMessage }: Props) {
 
       const finalConversation = [...updatedConversation, assistantMessage];
       setCurrentConversation(finalConversation);
+      setLastResponse(response.content);
 
       // Automatically save after AI response
       await saveChatMutation.mutateAsync(finalConversation);
@@ -158,6 +177,26 @@ export default function VoiceInterface({ onMessage }: Props) {
   const handleStopSpeaking = () => {
     synth.cancel();
     setIsSpeaking(false);
+    isSpeakingRef.current = false;
+  };
+
+  const handleRepeatLast = async () => {
+    if (lastResponse) {
+      await speakText(lastResponse);
+    } else {
+      toast({
+        title: "No response to repeat",
+        description: "There hasn't been any AI response yet.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSelectChat = (chat: any) => {
+    // Load the selected chat into the current conversation
+    setCurrentConversation(chat.messages);
+    setShowHistory(false);
+    conversationId.current = chat.id;
   };
 
   return (
@@ -202,6 +241,22 @@ export default function VoiceInterface({ onMessage }: Props) {
         >
           <Send className="h-6 w-6" />
         </Button>
+
+        <Button
+          onClick={handleRepeatLast}
+          className="w-12 h-12 bg-yellow-500 hover:bg-yellow-600 text-white border-none"
+          title="Repeat Last Response"
+        >
+          <Repeat className="h-6 w-6" />
+        </Button>
+
+        <Button
+          onClick={() => setShowHistory(true)}
+          className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white border-none"
+          title="View Chat History"
+        >
+          <History className="h-6 w-6" />
+        </Button>
       </div>
 
       {saveChatMutation.isPending && (
@@ -209,6 +264,12 @@ export default function VoiceInterface({ onMessage }: Props) {
           Saving conversation...
         </div>
       )}
+
+      <Dialog open={showHistory} onOpenChange={setShowHistory}>
+        <DialogContent className="sm:max-w-[800px] bg-black/95 border-cyan-500/50">
+          <ChatHistory onSelectChat={handleSelectChat} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
