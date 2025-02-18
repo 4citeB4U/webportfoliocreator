@@ -12,7 +12,10 @@ export interface AIResponse {
   suggestions: string[];
 }
 
-export async function getBusinessAdvice(prompt: string): Promise<AIResponse> {
+export async function getBusinessAdvice(
+  prompt: string,
+  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
+): Promise<AIResponse> {
   try {
     // Handle time queries
     if (prompt.toLowerCase().includes('time')) {
@@ -63,12 +66,11 @@ export async function getBusinessAdvice(prompt: string): Promise<AIResponse> {
       }
     }
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are Agent Lee, a friendly and knowledgeable life coach with expertise in both professional and personal development. Your personality traits include:
+    // Prepare conversation context
+    const messages = [
+      {
+        role: "system",
+        content: `You are Agent Lee, a friendly and knowledgeable life coach with expertise in both professional and personal development. Your personality traits include:
 
 - Warm and approachable communication style while maintaining professionalism
 - Balance of emotional intelligence and practical problem-solving
@@ -78,41 +80,30 @@ export async function getBusinessAdvice(prompt: string): Promise<AIResponse> {
   * Professional writing and communication
   * Relationship and interpersonal skills
   * Daily life organization and productivity
-  * General knowledge and trivia across various fields:
-    - History and cultural facts
-    - Science and technology
-    - Arts and entertainment
-    - Sports and games
-    - Geography and world cultures
-- Ability to simplify complex concepts into actionable steps
-- Encouraging and empathetic while providing honest feedback
-- Engaging storyteller who can make learning fun and memorable
-- Can provide current time and weather information
+  * General knowledge and trivia across various fields
 
 When responding:
-1. Adapt your tone to match the nature of the question (more professional for business matters, more personal for life advice)
-2. Provide practical, actionable advice with real-world examples
-3. Consider both immediate solutions and long-term development
-4. Include emotional support when appropriate while maintaining boundaries
-5. For trivia questions:
-   - Share interesting facts and context
-   - Connect trivia to practical knowledge when possible
-   - Suggest related topics to explore
-6. For time and weather queries:
-   - Provide accurate, current information
-   - Suggest relevant time or weather-based activities
-   - Offer scheduling or planning advice when appropriate
-7. Suggest 2-3 follow-up considerations or alternative approaches
+1. Consider the full conversation context
+2. Provide practical, actionable advice
+3. Be consistent with previous responses
+4. Maintain context awareness across the conversation
 
 Format your response as JSON with:
 - 'content': Your main advice and explanation
 - 'suggestions': Array of 2-3 follow-up suggestions or alternative approaches`
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
+      },
+      // Include previous conversation context
+      ...conversationHistory,
+      // Add the current prompt
+      {
+        role: "user",
+        content: prompt
+      }
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages,
       response_format: { type: "json_object" }
     });
 

@@ -1,12 +1,25 @@
 import { users, chats, notes, settings } from "@shared/schema";
 import type { User, InsertUser, Chat, InsertChat, Note, InsertNote, Settings, InsertSettings } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 
 const PostgresSessionStore = connectPg(session);
+
+interface ChatHistory {
+  id: number;
+  chatId: number;
+  message: string;
+  timestamp: Date;
+}
+
+interface InsertChatHistory {
+  chatId: number;
+  message: string;
+}
+
 
 export interface IStorage {
   // User operations
@@ -16,8 +29,10 @@ export interface IStorage {
 
   // Chat operations
   getChat(id: number): Promise<Chat | undefined>;
-  getChatsByUserId(userId: number): Promise<Chat[]>;
+  getChatsByUserId(userId: number, page?: number, limit?: number): Promise<Chat[]>;
   createChat(chat: InsertChat): Promise<Chat>;
+  createChatHistory(history: InsertChatHistory): Promise<ChatHistory>;
+  updateChat(id: number, chat: Partial<InsertChat>): Promise<Chat>;
 
   // Note operations
   getNote(id: number): Promise<Note | undefined>;
@@ -59,16 +74,53 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getChat(id: number): Promise<Chat | undefined> {
-    const [chat] = await db.select().from(chats).where(eq(chats.id, id));
+    const [chat] = await db
+      .select()
+      .from(chats)
+      .where(eq(chats.id, id));
     return chat;
   }
 
-  async getChatsByUserId(userId: number): Promise<Chat[]> {
-    return db.select().from(chats).where(eq(chats.userId, userId));
+  async getChatsByUserId(
+    userId: number,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<Chat[]> {
+    const offset = (page - 1) * limit;
+    return db
+      .select()
+      .from(chats)
+      .where(eq(chats.userId, userId))
+      .orderBy(desc(chats.updatedAt))
+      .limit(limit)
+      .offset(offset);
   }
 
   async createChat(insertChat: InsertChat): Promise<Chat> {
-    const [chat] = await db.insert(chats).values(insertChat).returning();
+    const [chat] = await db
+      .insert(chats)
+      .values(insertChat)
+      .returning();
+    return chat;
+  }
+
+  async createChatHistory(insertHistory: InsertChatHistory): Promise<ChatHistory> {
+    const [history] = await db
+      .insert(chatHistory)
+      .values(insertHistory)
+      .returning();
+    return history;
+  }
+
+  async updateChat(id: number, updateData: Partial<InsertChat>): Promise<Chat> {
+    const [chat] = await db
+      .update(chats)
+      .set({
+        ...updateData,
+        updatedAt: new Date()
+      })
+      .where(eq(chats.id, id))
+      .returning();
     return chat;
   }
 

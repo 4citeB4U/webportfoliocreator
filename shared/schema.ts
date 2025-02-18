@@ -11,15 +11,30 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Chat history table
+// Updated Chat history table with improved message structure
 export const chats = pgTable("chats", {
   id: serial("id").primaryKey(),
   userId: serial("user_id").references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
   messages: jsonb("messages").$type<Array<{
     role: 'user' | 'assistant';
     content: string;
+    timestamp: string;
   }>>().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Add chat history table
+export const chatHistory = pgTable("chat_history", {
+  id: serial("id").primaryKey(),
+  chatId: serial("chat_id").references(() => chats.id),
+  userId: serial("user_id").references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  summary: text("summary"),
+  messageCount: integer("message_count").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastMessageAt: timestamp("last_message_at").defaultNow().notNull(),
 });
 
 // Notes table
@@ -48,14 +63,17 @@ export const insertUserSchema = createInsertSchema(users).extend({
 export const insertChatSchema = createInsertSchema(chats);
 export const insertNoteSchema = createInsertSchema(notes);
 export const insertSettingsSchema = createInsertSchema(settings);
+export const insertChatHistorySchema = createInsertSchema(chatHistory);
 
 // Export types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertChat = z.infer<typeof insertChatSchema>;
 export type InsertNote = z.infer<typeof insertNoteSchema>;
 export type InsertSettings = z.infer<typeof insertSettingsSchema>;
+export type InsertChatHistory = z.infer<typeof insertChatHistorySchema>;
 
 export type User = typeof users.$inferSelect;
 export type Chat = typeof chats.$inferSelect;
 export type Note = typeof notes.$inferSelect;
 export type Settings = typeof settings.$inferSelect;
+export type ChatHistory = typeof chatHistory.$inferSelect;
