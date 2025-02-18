@@ -27,6 +27,7 @@ export default function VoiceInterface({ onMessage }: Props) {
   const conversationId = useRef<number | null>(null);
   const isSpeakingRef = useRef(false);
   const selectedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
+  const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   // Initialize voice selection
   useEffect(() => {
@@ -39,12 +40,11 @@ export default function VoiceInterface({ onMessage }: Props) {
           v.name.includes('Microsoft') || v.name.includes('Google')
         );
         selectedVoiceRef.current = microsoftVoice || englishVoices[0];
-        console.log('Selected voice:', selectedVoiceRef.current.name);
+        console.log('Selected voice:', selectedVoiceRef.current?.name);
       }
     };
 
     loadVoices();
-    // Some browsers need a little time to load voices
     synth.onvoiceschanged = loadVoices;
 
     return () => {
@@ -125,53 +125,66 @@ export default function VoiceInterface({ onMessage }: Props) {
     };
   }, [isListening]);
 
+  // Function to speak a single chunk of text
+  const speakChunk = async (chunk: string, voice: SpeechSynthesisVoice): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const utterance = new SpeechSynthesisUtterance(chunk.trim());
+      utterance.voice = voice;
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      currentUtteranceRef.current = utterance;
+
+      utterance.onend = () => {
+        currentUtteranceRef.current = null;
+        resolve();
+      };
+
+      utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event);
+        currentUtteranceRef.current = null;
+        reject(event);
+      };
+
+      synth.speak(utterance);
+    });
+  };
+
   const speakText = async (text: string) => {
     if (!selectedVoiceRef.current) {
       console.error('No voice selected for speech synthesis');
       return;
     }
 
-    if (synth.speaking) {
-      synth.cancel();
-    }
+    // Cancel any ongoing speech
+    handleStopSpeaking();
 
     setIsSpeaking(true);
     isSpeakingRef.current = true;
 
-    // Create smaller chunks for better synchronization
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-    const chunks = sentences.reduce((acc: string[], sentence) => {
-      // Split long sentences into smaller parts at commas or natural breaks
-      if (sentence.length > 100) {
-        const parts = sentence.split(/,(?=\s)/);
-        return [...acc, ...parts];
-      }
-      return [...acc, sentence];
-    }, []);
-
     try {
-      for (const chunk of chunks) {
+      console.log('Starting to speak with voice:', selectedVoiceRef.current.name);
+
+      // Split text into sentences, then further split long sentences
+      const sentences = text.split(/[.!?]+/).filter(Boolean);
+
+      for (const sentence of sentences) {
         if (!isSpeakingRef.current) break;
 
-        const utterance = new SpeechSynthesisUtterance(chunk.trim());
-        utterance.voice = selectedVoiceRef.current;
-        utterance.rate = 0.9; // Slightly slower rate for better clarity
-        utterance.pitch = 1.0;
+        // Split long sentences at commas
+        const chunks = sentence.length > 100 
+          ? sentence.split(/,(?=\s)/).map(chunk => chunk.trim())
+          : [sentence];
 
-        await new Promise<void>((resolve, reject) => {
-          utterance.onend = () => {
-            console.log('Finished speaking chunk:', chunk);
-            resolve();
-          };
-          utterance.onerror = (event) => {
-            console.error('Speech synthesis error:', event);
-            reject(event);
-          };
-          synth.speak(utterance);
-        });
+        for (const chunk of chunks) {
+          if (!isSpeakingRef.current) break;
 
-        // Small pause between chunks for natural rhythm
-        await new Promise(resolve => setTimeout(resolve, 100));
+          await speakChunk(chunk + '.', selectedVoiceRef.current);
+
+          // Small pause between chunks
+          if (isSpeakingRef.current) {
+            await new Promise(resolve => setTimeout(resolve, 150));
+          }
+        }
       }
     } catch (error) {
       console.error('Speech synthesis error:', error);
@@ -183,6 +196,7 @@ export default function VoiceInterface({ onMessage }: Props) {
     } finally {
       setIsSpeaking(false);
       isSpeakingRef.current = false;
+      currentUtteranceRef.current = null;
     }
   };
 
@@ -225,9 +239,14 @@ export default function VoiceInterface({ onMessage }: Props) {
   };
 
   const handleStopSpeaking = () => {
+    if (currentUtteranceRef.current) {
+      currentUtteranceRef.current.onend = null;
+      currentUtteranceRef.current.onerror = null;
+    }
     synth.cancel();
     setIsSpeaking(false);
     isSpeakingRef.current = false;
+    currentUtteranceRef.current = null;
   };
 
   const handleRepeatLast = async () => {
