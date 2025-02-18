@@ -26,6 +26,31 @@ export default function VoiceInterface({ onMessage }: Props) {
   const queryClient = useQueryClient();
   const conversationId = useRef<number | null>(null);
   const isSpeakingRef = useRef(false);
+  const selectedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
+
+  // Initialize voice selection
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = synth.getVoices();
+      const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
+      if (englishVoices.length > 0) {
+        // Prefer Microsoft voices if available
+        const microsoftVoice = englishVoices.find(v => 
+          v.name.includes('Microsoft') || v.name.includes('Google')
+        );
+        selectedVoiceRef.current = microsoftVoice || englishVoices[0];
+        console.log('Selected voice:', selectedVoiceRef.current.name);
+      }
+    };
+
+    loadVoices();
+    // Some browsers need a little time to load voices
+    synth.onvoiceschanged = loadVoices;
+
+    return () => {
+      synth.onvoiceschanged = null;
+    };
+  }, []);
 
   const saveChatMutation = useMutation({
     mutationFn: async (messages: typeof currentConversation) => {
@@ -101,6 +126,11 @@ export default function VoiceInterface({ onMessage }: Props) {
   }, [isListening]);
 
   const speakText = async (text: string) => {
+    if (!selectedVoiceRef.current) {
+      console.error('No voice selected for speech synthesis');
+      return;
+    }
+
     if (synth.speaking) {
       synth.cancel();
     }
@@ -124,12 +154,19 @@ export default function VoiceInterface({ onMessage }: Props) {
         if (!isSpeakingRef.current) break;
 
         const utterance = new SpeechSynthesisUtterance(chunk.trim());
+        utterance.voice = selectedVoiceRef.current;
         utterance.rate = 0.9; // Slightly slower rate for better clarity
         utterance.pitch = 1.0;
 
         await new Promise<void>((resolve, reject) => {
-          utterance.onend = () => resolve();
-          utterance.onerror = () => reject();
+          utterance.onend = () => {
+            console.log('Finished speaking chunk:', chunk);
+            resolve();
+          };
+          utterance.onerror = (event) => {
+            console.error('Speech synthesis error:', event);
+            reject(event);
+          };
           synth.speak(utterance);
         });
 
