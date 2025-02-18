@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getBusinessAdvice } from '@/lib/openai';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ChatHistory } from '@/components/ChatHistory';
 
 interface Props {
@@ -37,7 +37,10 @@ export default function VoiceInterface({ onMessage }: Props) {
 
       const response = await apiRequest(method, endpoint, {
         title: messages[0]?.content.substring(0, 50) + "...",
-        messages
+        messages: messages.map(msg => ({
+          ...msg,
+          timestamp: new Date().toISOString()
+        }))
       });
 
       if (!conversationId.current) {
@@ -116,24 +119,34 @@ export default function VoiceInterface({ onMessage }: Props) {
       return [...acc, sentence];
     }, []);
 
-    for (const chunk of chunks) {
-      if (!isSpeakingRef.current) break;
+    try {
+      for (const chunk of chunks) {
+        if (!isSpeakingRef.current) break;
 
-      const utterance = new SpeechSynthesisUtterance(chunk.trim());
-      utterance.rate = 0.9; // Slightly slower rate for better clarity
-      utterance.pitch = 1.0;
+        const utterance = new SpeechSynthesisUtterance(chunk.trim());
+        utterance.rate = 0.9; // Slightly slower rate for better clarity
+        utterance.pitch = 1.0;
 
-      await new Promise<void>((resolve) => {
-        utterance.onend = () => resolve();
-        synth.speak(utterance);
+        await new Promise<void>((resolve, reject) => {
+          utterance.onend = () => resolve();
+          utterance.onerror = () => reject();
+          synth.speak(utterance);
+        });
+
+        // Small pause between chunks for natural rhythm
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    } catch (error) {
+      console.error('Speech synthesis error:', error);
+      toast({
+        title: "Speech Error",
+        description: "Failed to speak the response. Please try again.",
+        variant: "destructive"
       });
-
-      // Small pause between chunks for natural rhythm
-      await new Promise(resolve => setTimeout(resolve, 100));
+    } finally {
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
     }
-
-    setIsSpeaking(false);
-    isSpeakingRef.current = false;
   };
 
   const handleSubmit = async () => {
@@ -145,10 +158,10 @@ export default function VoiceInterface({ onMessage }: Props) {
     const updatedConversation = [...currentConversation, userMessage];
     setCurrentConversation(updatedConversation);
 
-    // Automatically save after user message
-    await saveChatMutation.mutateAsync(updatedConversation);
-
     try {
+      // Automatically save after user message
+      await saveChatMutation.mutateAsync(updatedConversation);
+
       const response = await getBusinessAdvice(inputText, updatedConversation);
       const assistantMessage = { role: 'assistant' as const, content: response.content };
       onMessage(assistantMessage);
@@ -162,10 +175,10 @@ export default function VoiceInterface({ onMessage }: Props) {
 
       // Speak the response
       await speakText(response.content);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to get response from AI",
+        description: error.message || "Failed to get response from AI",
         variant: "destructive"
       });
     }
@@ -267,6 +280,7 @@ export default function VoiceInterface({ onMessage }: Props) {
 
       <Dialog open={showHistory} onOpenChange={setShowHistory}>
         <DialogContent className="sm:max-w-[800px] bg-black/95 border-cyan-500/50">
+          <DialogTitle>Chat History</DialogTitle>
           <ChatHistory onSelectChat={handleSelectChat} />
         </DialogContent>
       </Dialog>

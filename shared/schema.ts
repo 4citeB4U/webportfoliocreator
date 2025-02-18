@@ -25,7 +25,7 @@ export const chats = pgTable("chats", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Add chat history table
+// Chat history table for tracking conversations
 export const chatHistory = pgTable("chat_history", {
   id: serial("id").primaryKey(),
   chatId: serial("chat_id").references(() => chats.id),
