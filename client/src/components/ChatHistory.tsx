@@ -18,10 +18,11 @@ export function ChatHistory({ onSelectChat }: { onSelectChat: (chat: Chat) => vo
   });
 
   const downloadChat = async (chat: Chat) => {
+    // Format the chat content with clear separation between messages
     const content = chat.messages.map(msg => 
-      `${msg.role}: ${msg.content} (${msg.timestamp})`
-    ).join('\n\n');
-    
+      `${msg.role.toUpperCase()}: ${msg.content}\n[${new Date(msg.timestamp).toLocaleString()}]\n`
+    ).join('\n---\n\n');
+
     const blob = new Blob([content], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -34,7 +35,7 @@ export function ChatHistory({ onSelectChat }: { onSelectChat: (chat: Chat) => vo
   };
 
   if (isLoading) {
-    return <div className="text-center p-4">Loading chat history...</div>;
+    return <div className="text-center p-4 text-gray-400">Loading chat history...</div>;
   }
 
   return (
@@ -75,7 +76,31 @@ export function ChatHistory({ onSelectChat }: { onSelectChat: (chat: Chat) => vo
                   </Button>
                 </div>
               </div>
-              <div className="flex items-center text-sm text-gray-400">
+
+              {/* Preview last few messages */}
+              <div className="mt-2 space-y-2">
+                {chat.messages.slice(-2).map((msg, i) => (
+                  <div 
+                    key={i}
+                    className={`p-2 rounded ${
+                      msg.role === 'user' 
+                        ? 'bg-cyan-500/10 border-l-2 border-cyan-500'
+                        : 'bg-green-500/10 border-l-2 border-green-500'
+                    }`}
+                  >
+                    <div className="text-xs font-medium mb-1 text-gray-400">
+                      {msg.role === 'user' ? 'You' : 'Agent Lee'}
+                    </div>
+                    <div className="text-sm text-gray-300">
+                      {msg.content.length > 100
+                        ? `${msg.content.substring(0, 100)}...`
+                        : msg.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center text-sm text-gray-400 mt-2">
                 <Clock className="h-4 w-4 mr-1" />
                 {formatDistanceToNow(new Date(chat.createdAt), { addSuffix: true })}
                 <span className="mx-2">•</span>

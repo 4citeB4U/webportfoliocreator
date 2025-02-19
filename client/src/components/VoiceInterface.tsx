@@ -60,8 +60,8 @@ export default function VoiceInterface({ onMessage }: Props) {
 
   const saveChatMutation = useMutation({
     mutationFn: async (messages: typeof currentConversation) => {
-      const endpoint = conversationId.current ? 
-        `/api/chats/${conversationId.current}` : 
+      const endpoint = conversationId.current ?
+        `/api/chats/${conversationId.current}` :
         "/api/chats";
 
       const method = conversationId.current ? "PATCH" : "POST";
@@ -156,6 +156,7 @@ export default function VoiceInterface({ onMessage }: Props) {
     });
   };
 
+  // Update the speakText function to handle longer text better
   const speakText = async (text: string) => {
     if (!selectedVoiceRef.current) {
       console.error('No voice selected for speech synthesis');
@@ -172,28 +173,50 @@ export default function VoiceInterface({ onMessage }: Props) {
     try {
       console.log('Started speaking with voice:', selectedVoiceRef.current.name);
 
-      // Split text into sentences
-      const sentences = text.split(/[.!?]+/).filter(Boolean);
+      // Split text into smaller, more manageable chunks at natural break points
+      const paragraphs = text.split(/(?<=[.!?])\s+/);
 
-      for (const sentence of sentences) {
+      for (const paragraph of paragraphs) {
         if (!isSpeakingRef.current) break;
 
-        console.log('Speaking sentence:', sentence);
+        // Split long paragraphs into sentences
+        const sentences = paragraph.split(/(?<=[.!?])\s+/).filter(Boolean);
 
-        // Split long sentences at commas
-        const chunks = sentence.length > 100 
-          ? sentence.split(/,(?=\s)/).map(chunk => chunk.trim())
-          : [sentence];
-
-        for (const chunk of chunks) {
+        for (const sentence of sentences) {
           if (!isSpeakingRef.current) break;
 
-          await speakChunk(chunk + '.', selectedVoiceRef.current);
+          console.log('Speaking sentence:', sentence);
 
-          // Small pause between chunks
-          if (isSpeakingRef.current) {
-            await new Promise(resolve => setTimeout(resolve, 200));
+          // Split very long sentences at commas or natural pauses
+          const chunks = sentence.length > 100
+            ? sentence.split(/,(?=\s)|;(?=\s)|\s(?=and\s|\but\s|however\s)/).map(chunk => chunk.trim())
+            : [sentence];
+
+          for (const chunk of chunks) {
+            if (!isSpeakingRef.current) break;
+
+            try {
+              await speakChunk(chunk + (chunk.match(/[.!?]$/) ? '' : '.'), selectedVoiceRef.current);
+
+              // Longer pause between chunks for better clarity
+              if (isSpeakingRef.current) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+              }
+            } catch (error) {
+              console.error('Error speaking chunk:', error);
+              // Continue with next chunk even if one fails
+            }
           }
+
+          // Additional pause between sentences
+          if (isSpeakingRef.current) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
+
+        // Longer pause between paragraphs
+        if (isSpeakingRef.current) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
     } catch (error) {
@@ -208,15 +231,16 @@ export default function VoiceInterface({ onMessage }: Props) {
       isSpeakingRef.current = false;
       currentUtteranceRef.current = null;
 
-      // Start listening after speaking is complete
+      // Start listening after speaking is complete with a delay
       setTimeout(() => {
         if (!isSpeakingRef.current) {
           setIsListening(true);
         }
-      }, 500);
+      }, 1000);
     }
   };
 
+  // Update the handleSubmit function to better handle the conversation flow
   const handleSubmit = async () => {
     if (!inputText.trim()) return;
 
@@ -227,8 +251,11 @@ export default function VoiceInterface({ onMessage }: Props) {
     setCurrentConversation(updatedConversation);
 
     try {
-      // Automatically save after user message
+      // Save after user message
       await saveChatMutation.mutateAsync(updatedConversation);
+
+      setInputText('');
+      setTranscript('');
 
       const response = await getBusinessAdvice(inputText, updatedConversation);
       const assistantMessage = { role: 'assistant' as const, content: response.content };
@@ -238,21 +265,19 @@ export default function VoiceInterface({ onMessage }: Props) {
       setCurrentConversation(finalConversation);
       setLastResponse(response.content);
 
-      // Automatically save after AI response
+      // Save after AI response
       await saveChatMutation.mutateAsync(finalConversation);
 
-      // Speak the response
+      // Speak the response with improved handling
       await speakText(response.content);
     } catch (error: any) {
+      console.error('Error in conversation:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to get response from AI",
         variant: "destructive"
       });
     }
-
-    setInputText('');
-    setTranscript('');
   };
 
   const handleStopSpeaking = () => {
@@ -293,10 +318,10 @@ export default function VoiceInterface({ onMessage }: Props) {
           size="icon"
           onClick={() => setIsListening(!isListening)}
           className={`w-12 h-12 ${
-            isListening 
-              ? 'bg-red-500 text-white hover:bg-red-600' 
+            isListening
+              ? 'bg-red-500 text-white hover:bg-red-600'
               : 'bg-green-500 hover:bg-green-600 text-white border-none'
-          }`}
+            }`}
           title={isListening ? "Stop Voice Input" : "Start Voice Input"}
           disabled={isSpeakingRef.current}
         >
@@ -321,7 +346,7 @@ export default function VoiceInterface({ onMessage }: Props) {
           onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
         />
 
-        <Button 
+        <Button
           onClick={handleSubmit}
           className="w-12 h-12 bg-green-500 hover:bg-green-600 text-white border-none"
           title="Send Message"
