@@ -380,7 +380,10 @@ export default function VoiceInterface({ onMessage }: Props) {
       <Dialog open={showHistory} onOpenChange={setShowHistory}>
         <DialogContent className="sm:max-w-[800px] bg-black/95 border-cyan-500/50">
           <DialogTitle>Chat History</DialogTitle>
-          <ChatHistory onSelectChat={handleSelectChat} />
+          <ChatHistory 
+            onSelectChat={handleSelectChat} 
+            onClose={() => setShowHistory(false)}
+          />
         </DialogContent>
       </Dialog>
     </div>
