@@ -21,6 +21,7 @@ export default function VoiceInterface({ onMessage }: Props) {
   const [currentConversation, setCurrentConversation] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [lastResponse, setLastResponse] = useState<string | null>(null);
+  const [currentSpeakingText, setCurrentSpeakingText] = useState<string | null>(null); // Added state variable
   const { toast } = useToast();
   const synth = window.speechSynthesis;
   const queryClient = useQueryClient();
@@ -42,7 +43,6 @@ export default function VoiceInterface({ onMessage }: Props) {
           selectedVoiceRef.current = microsoftAndrew;
         } else {
           console.log('Available voices:', englishVoices.map(v => v.name).join(', '));
-          // Fallback to first English voice if Microsoft Andrew is not available
           const defaultVoice = englishVoices[0];
           selectedVoiceRef.current = defaultVoice;
           console.log('Using voice:', defaultVoice.name);
@@ -106,7 +106,6 @@ export default function VoiceInterface({ onMessage }: Props) {
 
     recognition.onresult = (event) => {
       if (isSpeakingRef.current) {
-        // Don't process results while AI is speaking
         return;
       }
 
@@ -131,7 +130,6 @@ export default function VoiceInterface({ onMessage }: Props) {
     };
   }, [isListening]);
 
-  // Function to speak a single chunk of text
   const speakChunk = async (chunk: string, voice: SpeechSynthesisVoice): Promise<void> => {
     return new Promise((resolve, reject) => {
       const utterance = new SpeechSynthesisUtterance(chunk.trim());
@@ -141,7 +139,6 @@ export default function VoiceInterface({ onMessage }: Props) {
       currentUtteranceRef.current = utterance;
 
       utterance.onend = () => {
-        console.log('Finished speaking chunk:', chunk);
         currentUtteranceRef.current = null;
         resolve();
       };
@@ -156,12 +153,15 @@ export default function VoiceInterface({ onMessage }: Props) {
     });
   };
 
-  // Update the speakText function to handle longer text better
   const speakText = async (text: string) => {
     if (!selectedVoiceRef.current) {
       console.error('No voice selected for speech synthesis');
       return;
     }
+
+    // Set the current speaking text immediately when starting to speak
+    setCurrentSpeakingText(text);
+    setLastResponse(text);
 
     // Cancel any ongoing speech and recording
     handleStopSpeaking();
@@ -173,13 +173,11 @@ export default function VoiceInterface({ onMessage }: Props) {
     try {
       console.log('Started speaking with voice:', selectedVoiceRef.current.name);
 
-      // Split text into smaller, more manageable chunks at natural break points
       const paragraphs = text.split(/(?<=[.!?])\s+/);
 
       for (const paragraph of paragraphs) {
         if (!isSpeakingRef.current) break;
 
-        // Split long paragraphs into sentences
         const sentences = paragraph.split(/(?<=[.!?])\s+/).filter(Boolean);
 
         for (const sentence of sentences) {
@@ -187,7 +185,6 @@ export default function VoiceInterface({ onMessage }: Props) {
 
           console.log('Speaking sentence:', sentence);
 
-          // Split very long sentences at commas or natural pauses
           const chunks = sentence.length > 100
             ? sentence.split(/,(?=\s)|;(?=\s)|\s(?=and\s|\but\s|however\s)/).map(chunk => chunk.trim())
             : [sentence];
@@ -198,23 +195,19 @@ export default function VoiceInterface({ onMessage }: Props) {
             try {
               await speakChunk(chunk + (chunk.match(/[.!?]$/) ? '' : '.'), selectedVoiceRef.current);
 
-              // Longer pause between chunks for better clarity
               if (isSpeakingRef.current) {
                 await new Promise(resolve => setTimeout(resolve, 300));
               }
             } catch (error) {
               console.error('Error speaking chunk:', error);
-              // Continue with next chunk even if one fails
             }
           }
 
-          // Additional pause between sentences
           if (isSpeakingRef.current) {
             await new Promise(resolve => setTimeout(resolve, 500));
           }
         }
 
-        // Longer pause between paragraphs
         if (isSpeakingRef.current) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
@@ -231,7 +224,6 @@ export default function VoiceInterface({ onMessage }: Props) {
       isSpeakingRef.current = false;
       currentUtteranceRef.current = null;
 
-      // Start listening after speaking is complete with a delay
       setTimeout(() => {
         if (!isSpeakingRef.current) {
           setIsListening(true);
@@ -240,7 +232,6 @@ export default function VoiceInterface({ onMessage }: Props) {
     }
   };
 
-  // Update the handleSubmit function to better handle the conversation flow
   const handleSubmit = async () => {
     if (!inputText.trim()) return;
 
@@ -251,7 +242,6 @@ export default function VoiceInterface({ onMessage }: Props) {
     setCurrentConversation(updatedConversation);
 
     try {
-      // Save after user message
       await saveChatMutation.mutateAsync(updatedConversation);
 
       setInputText('');
@@ -263,12 +253,10 @@ export default function VoiceInterface({ onMessage }: Props) {
 
       const finalConversation = [...updatedConversation, assistantMessage];
       setCurrentConversation(finalConversation);
+
+      // Store response before speaking
       setLastResponse(response.content);
-
-      // Save after AI response
       await saveChatMutation.mutateAsync(finalConversation);
-
-      // Speak the response with improved handling
       await speakText(response.content);
     } catch (error: any) {
       console.error('Error in conversation:', error);
@@ -292,9 +280,15 @@ export default function VoiceInterface({ onMessage }: Props) {
   };
 
   const handleRepeatLast = async () => {
-    if (lastResponse) {
-      console.log('Repeating last response:', lastResponse);
-      await speakText(lastResponse);
+    // Use currentSpeakingText if available (during speech), otherwise use lastResponse
+    const textToRepeat = currentSpeakingText || lastResponse;
+
+    if (textToRepeat) {
+      console.log('Repeating:', textToRepeat);
+      // Stop current speech if any
+      handleStopSpeaking();
+      // Start speaking the text
+      await speakText(textToRepeat);
     } else {
       toast({
         title: "No response to repeat",
