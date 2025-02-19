@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer } from "http";
 import { storage } from "./storage";
-import { insertChatSchema, insertChatHistorySchema } from "@shared/schema";
+import { insertChatSchema } from "@shared/schema";
 import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express) {
@@ -29,7 +29,6 @@ export async function registerRoutes(app: Express) {
       // Create chat history entry
       await storage.createChatHistory({
         chatId: chat.id,
-        userId: req.user.id,
         title: req.body.title || `Chat ${chat.id}`,
         messageCount: chat.messages.length,
         summary: chat.messages[0].content.substring(0, 100) + "..."

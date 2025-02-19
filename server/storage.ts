@@ -1,25 +1,12 @@
-import { users, chats, notes, settings } from "@shared/schema";
-import type { User, InsertUser, Chat, InsertChat, Note, InsertNote, Settings, InsertSettings } from "@shared/schema";
+import { users, chats, chatHistory, notes, settings } from "@shared/schema";
+import type { User, InsertUser, Chat, InsertChat, Note, InsertNote, Settings, InsertSettings, ChatHistory, InsertChatHistory } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 
 const PostgresSessionStore = connectPg(session);
-
-interface ChatHistory {
-  id: number;
-  chatId: number;
-  message: string;
-  timestamp: Date;
-}
-
-interface InsertChatHistory {
-  chatId: number;
-  message: string;
-}
-
 
 export interface IStorage {
   // User operations
@@ -97,10 +84,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createChat(insertChat: InsertChat): Promise<Chat> {
-    const [chat] = await db
-      .insert(chats)
-      .values(insertChat)
-      .returning();
+    // Ensure messages is an array before inserting
+    const chatData = {
+      ...insertChat,
+      messages: Array.isArray(insertChat.messages) ? insertChat.messages : []
+    };
+
+    const [chat] = await db.insert(chats).values(chatData).returning();
     return chat;
   }
 
@@ -113,12 +103,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateChat(id: number, updateData: Partial<InsertChat>): Promise<Chat> {
+    // Ensure messages is an array before updating
+    const chatData = {
+      ...updateData,
+      messages: Array.isArray(updateData.messages) ? updateData.messages : [],
+      updatedAt: new Date()
+    };
+
     const [chat] = await db
       .update(chats)
-      .set({
-        ...updateData,
-        updatedAt: new Date()
-      })
+      .set(chatData)
       .where(eq(chats.id, id))
       .returning();
     return chat;
