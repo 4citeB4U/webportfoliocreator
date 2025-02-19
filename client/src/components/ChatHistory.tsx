@@ -18,7 +18,6 @@ export function ChatHistory({ onSelectChat }: { onSelectChat: (chat: Chat) => vo
   });
 
   const downloadChat = async (chat: Chat) => {
-    // Format the chat content with clear separation between messages
     const content = chat.messages.map(msg => 
       `${msg.role.toUpperCase()}: ${msg.content}\n[${new Date(msg.timestamp).toLocaleString()}]\n`
     ).join('\n---\n\n');
@@ -47,15 +46,15 @@ export function ChatHistory({ onSelectChat }: { onSelectChat: (chat: Chat) => vo
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[400px] pr-4">
+        <ScrollArea className="h-[600px] pr-4"> {/* Increased height for more content */}
           {chats?.map((chat) => (
             <div
               key={chat.id}
-              className="mb-4 p-4 rounded-lg border border-cyan-500/20 hover:border-cyan-500/50 transition-colors"
+              className="mb-6 p-4 rounded-lg border border-cyan-500/20 hover:border-cyan-500/50 transition-colors"
             >
-              <div className="flex justify-between items-start mb-2">
+              <div className="flex justify-between items-start mb-4">
                 <h3 className="text-lg font-semibold text-cyan-400">
-                  {chat.title || `Chat ${chat.id}`}
+                  Conversation {formatDistanceToNow(new Date(chat.createdAt), { addSuffix: true })}
                 </h3>
                 <div className="flex gap-2">
                   <Button
@@ -77,32 +76,35 @@ export function ChatHistory({ onSelectChat }: { onSelectChat: (chat: Chat) => vo
                 </div>
               </div>
 
-              {/* Preview last few messages */}
-              <div className="mt-2 space-y-2">
-                {chat.messages.slice(-2).map((msg, i) => (
+              {/* Show all messages in the conversation */}
+              <div className="space-y-3">
+                {chat.messages.map((msg, i) => (
                   <div 
                     key={i}
-                    className={`p-2 rounded ${
+                    className={`p-3 rounded ${
                       msg.role === 'user' 
                         ? 'bg-cyan-500/10 border-l-2 border-cyan-500'
                         : 'bg-green-500/10 border-l-2 border-green-500'
                     }`}
                   >
-                    <div className="text-xs font-medium mb-1 text-gray-400">
-                      {msg.role === 'user' ? 'You' : 'Agent Lee'}
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-400">
+                        {msg.role === 'user' ? 'You' : 'Agent Lee'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {new Date(msg.timestamp).toLocaleString()}
+                      </span>
                     </div>
-                    <div className="text-sm text-gray-300">
-                      {msg.content.length > 100
-                        ? `${msg.content.substring(0, 100)}...`
-                        : msg.content}
+                    <div className="text-sm text-gray-300 whitespace-pre-wrap">
+                      {msg.content}
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="flex items-center text-sm text-gray-400 mt-2">
-                <Clock className="h-4 w-4 mr-1" />
-                {formatDistanceToNow(new Date(chat.createdAt), { addSuffix: true })}
+              <div className="flex items-center text-xs text-gray-400 mt-3 pt-2 border-t border-gray-800">
+                <Clock className="h-3 w-3 mr-1" />
+                Started {formatDistanceToNow(new Date(chat.createdAt), { addSuffix: true })}
                 <span className="mx-2">•</span>
                 {chat.messages.length} messages
               </div>
