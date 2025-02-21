@@ -5,6 +5,7 @@ import { useToast } from '../../hooks/use-toast';
 import DraggableComponent from '../../components/portfolio/DraggableComponent';
 import DroppableArea from '../../components/portfolio/DroppableArea';
 import ComponentLibrary, { DEFAULT_COMPONENTS } from '../../components/portfolio/ComponentLibrary';
+import QRCodeDisplay from '../../components/QRCodeDisplay';
 import { getQueryFn, apiRequest } from '../../lib/queryClient';
 
 const PortfolioEditor = () => {
@@ -28,6 +29,16 @@ const PortfolioEditor = () => {
     }
   }, [portfolio]);
 
+// Handle publish state
+  const [isPublished, setIsPublished] = useState(portfolio?.isPublished || false);
+
+  // Initialize published state from portfolio data
+  useEffect(() => {
+    if (portfolio?.isPublished !== undefined) {
+      setIsPublished(portfolio.isPublished);
+    }
+  }, [portfolio?.isPublished]);
+
   // Save mutation
   const saveMutation = useMutation({
     mutationFn: async (data) => {
@@ -39,13 +50,15 @@ const PortfolioEditor = () => {
         content: {
           components: data.components
         },
-        settings: data.settings || {}
+        settings: data.settings || {},
+        isPublished: data.isPublished
       });
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setIsDirty(false);
+      setIsPublished(data.isPublished);
       toast({
         title: 'Success',
         description: 'Portfolio saved successfully',
@@ -129,13 +142,46 @@ const PortfolioEditor = () => {
           <h1 className="text-2xl font-bold">
             {portfolio?.title || 'New Portfolio'}
           </h1>
-          <div className="space-x-4">
-            <button
-              onClick={() => navigate('/portfolios')}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Cancel
-            </button>
+          <div className="flex items-center space-x-4 bg-white p-2 rounded shadow-sm">
+            {id && (
+              <div className="flex items-center space-x-2">
+                <QRCodeDisplay url={window.location.origin + `/portfolio/${id}`} size={96} />
+                <a
+                  href={`/portfolio/${id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
+                >
+                  Preview
+                </a>
+              </div>
+            )}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/')}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setIsPublished(!isPublished);
+                  await saveMutation.mutateAsync({
+                    title: portfolio?.title || 'Untitled Portfolio',
+                    components,
+                    settings: portfolio?.settings || {},
+                    isPublished: !isPublished
+                  });
+                }}
+                className={`px-4 py-2 rounded ${
+                  isPublished
+                    ? 'bg-gray-500 hover:bg-gray-600'
+                    : 'bg-green-500 hover:bg-green-600'
+                } text-white`}
+              >
+                {isPublished ? 'Unpublish' : 'Publish'}
+              </button>
+            </div>
             <button
               onClick={handleSave}
               disabled={!isDirty || saveMutation.isPending}
