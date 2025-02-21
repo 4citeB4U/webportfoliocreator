@@ -1,0 +1,277 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const Page = ({ content, pageNumber }) => {
+  return (
+    <div className="page">
+      <div className="page-content">
+        {content.title && (
+          <h1 className="text-3xl font-bold mb-6 text-center">{content.title}</h1>
+        )}
+        {content.subtitle && (
+          <h2 className="text-xl text-gray-600 mb-6 text-center">{content.subtitle}</h2>
+        )}
+        {content.text && content.text.split('\n\n').map((paragraph, idx) => (
+          <p key={idx} className="text-base mb-4">
+            {paragraph}
+          </p>
+        ))}
+        {content.image && (
+          <div className="my-4">
+            <img 
+              src={content.image} 
+              alt={content.imageAlt || 'Book illustration'} 
+              className="mx-auto"
+            />
+          </div>
+        )}
+        <div className="absolute bottom-4 text-center w-full">
+          <span className="text-gray-500">- {pageNumber} -</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DigitalBook = () => {
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const speakRef = useRef(null);
+
+  // Complete book content
+  const bookContent = [
+    {
+      type: 'cover',
+      title: "Needle & Yarn: A Love Stitched in Time",
+      subtitle: "By Leola (Sista) Lee – With a Wink and a Warm Stitch",
+      pageNumber: null,
+      image: '/api/placeholder/400/300'
+    },
+    {
+      type: 'dedication',
+      text: "Dedication\n\n(Perfectly expressed)",
+      pageNumber: 'i'
+    },
+    {
+      type: 'index',
+      title: "Index",
+      text: `🌟 Prologue: A Stitch in Time - Pg. 1
+
+🧶 Chapter 1: The Spark - A Serendipitous Meeting (and a Lifetime of Possibilities) - Pg. 5
+
+Needle's backstory, Yarn's arrival, holding the hook and yarn, making a slip knot, and the chain stitch.
+
+🌹 Chapter 2: The First Dance - A Scarf of Whispers (and the Rhythm of Single Crochet) - Pg. 20
+
+Making a simple scarf; learning single crochet, maintaining tension, straight edges, exploring Yarn's dreams.
+
+💞 Chapter 3: Threads Entwined - A Hat of Hopes (and the Warmth of Half Double Crochet) - Pg. 40
+
+Making a hat; learning half double crochet, increasing, working in the round, Needle's memories of past crafters.
+
+🌼 Chapter 4: Tangled Tight - A Blanket of Dreams (and the Strength of Joining Squares) - Pg. 65
+
+Making a granny square blanket; learning to join squares, color changes, facing frustrations, Yarn's insecurities.
+
+💍 Chapter 5: A Promise Woven - The Lace Doily of Forever (and the Language of Charts) - Pg. 95
+
+Making a lace doily; learning to read crochet charts, picots, blocking, Needle's declaration of love.
+
+👰 Chapter 6: The Tapestry of Love - A Bridal Shawl (and the Celebration of a Lifetime) - Pg. 125
+
+Making a bridal shawl; combining all learned skills, adding embellishments, Yarn and Needle's wedding.
+
+📚 Epilogue: Stitches of Legacy - Pg. 155
+
+🧶 Appendix: The Crocheter's Companion - Pg. 160`,
+      pageNumber: 'ii'
+    },
+    {
+      type: 'chapter',
+      title: "Prologue: A Stitch in Time",
+      text: `"Now, y'all come on up here and gather 'round, closer, closer! Let Sista Lee spin you a yarn – not just any yarn, mind you, but a tale woven with love, laughter, and the magic of crochet. Imagine, if you will, a world where the very tools of our craft have hearts that beat, dreams that soar, and stories that yearn to be told. This is the story of Needle, a hook with a history, and Yarn, a spirit as bright as the colors she embodies.
+
+Their love story, my dears, isn't just about stitches and loops. It's about the connections we make, the challenges we overcome, and the beauty we create when we open our hearts to the possibilities. And as you follow their journey, you'll not only learn the secrets of crochet, passed down through generations, but you'll also discover the enduring power of love, patience, and the joy of bringing something beautiful into the world.
+
+So, settle in, get comfortable, and prepare to be enchanted. Let's unravel this tale together, one stitch, one moment, one heartbeat at a time."`,
+      pageNumber: 1,
+      image: '/api/placeholder/400/300'
+    },
+    // Additional pages would continue here...
+  ];
+
+  const speak = (text) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      // Try to set a female voice
+      const voices = window.speechSynthesis.getVoices();
+      const femaleVoice = voices.find(voice => 
+        voice.name.toLowerCase().includes('female') || 
+        voice.name.toLowerCase().includes('woman')
+      );
+      
+      if (femaleVoice) {
+        utterance.voice = femaleVoice;
+      }
+      
+      utterance.rate = 0.9;
+      utterance.pitch = 1.1;
+      
+      speakRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const stopSpeaking = () => {
+    if (speakRef.current) {
+      window.speechSynthesis.cancel();
+    }
+  };
+
+  const togglePlay = () => {
+    setIsPlaying(!isPlaying);
+    if (!isPlaying) {
+      speak(bookContent[currentPage].text);
+    } else {
+      stopSpeaking();
+    }
+  };
+
+  const turnPage = (direction) => {
+    stopSpeaking();
+    setIsPlaying(false);
+    
+    setCurrentPage(prev => {
+      if (direction === 'next') {
+        return Math.min(prev + 2, bookContent.length - 1);
+      } else {
+        return Math.max(prev - 2, 0);
+      }
+    });
+  };
+
+  return (
+    <div className="relative w-full h-screen bg-gray-900 overflow-hidden">
+      <div className="book-container">
+        <div className="book">
+          <div className="pages-container">
+            <Page 
+              content={bookContent[currentPage]} 
+              pageNumber={bookContent[currentPage].pageNumber}
+            />
+            {currentPage + 1 < bookContent.length && (
+              <Page 
+                content={bookContent[currentPage + 1]}
+                pageNumber={bookContent[currentPage + 1].pageNumber}
+              />
+            )}
+          </div>
+          
+          <div className="controls">
+            <button
+              onClick={() => turnPage('prev')}
+              disabled={currentPage === 0}
+              className="nav-button"
+            >
+              <ChevronLeft className="w-8 h-8" />
+            </button>
+
+            <button
+              onClick={togglePlay}
+              className="play-button"
+            >
+              {isPlaying ? (
+                <Pause className="w-8 h-8" />
+              ) : (
+                <Play className="w-8 h-8" />
+              )}
+            </button>
+
+            <button
+              onClick={() => turnPage('next')}
+              disabled={currentPage >= bookContent.length - 2}
+              className="nav-button"
+            >
+              <ChevronRight className="w-8 h-8" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .book-container {
+          width: 90vw;
+          max-width: 1200px;
+          height: 80vh;
+          margin: 2rem auto;
+          perspective: 2000px;
+        }
+
+        .book {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          background: white;
+          border-radius: 10px;
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .pages-container {
+          display: flex;
+          height: calc(100% - 60px);
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .page {
+          flex: 1;
+          padding: 2rem;
+          position: relative;
+          background: white;
+          border-right: 1px solid #e5e7eb;
+        }
+
+        .page-content {
+          height: 100%;
+          overflow-y: auto;
+          padding-bottom: 2rem;
+        }
+
+        .controls {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.9);
+        }
+
+        .nav-button,
+        .play-button {
+          padding: 0.5rem;
+          border-radius: 9999px;
+          background: white;
+          border: 1px solid #e5e7eb;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .nav-button:hover,
+        .play-button:hover {
+          background: #f3f4f6;
+        }
+
+        .nav-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default DigitalBook;

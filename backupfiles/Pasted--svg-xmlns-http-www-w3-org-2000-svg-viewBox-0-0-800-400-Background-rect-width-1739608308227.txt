@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <!-- Background -->
+  <rect width="800" height="400" fill="#000022"/>
+  
+  <!-- Crystal Pattern Underlay -->
+  <path d="M100,100 L150,50 L200,100 L150,150 Z" fill="none" stroke="#00FFFF" stroke-width="1" opacity="0.1">
+    <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/>
+  </path>
+  
+  <path d="M300,150 L350,100 L400,150 L350,200 Z" fill="none" stroke="#FF00FF" stroke-width="1" opacity="0.1">
+    <animate attributeName="opacity" values="0.1;0.3;0.1" dur="2.5s" repeatCount="indefinite"/>
+  </path>
+
+  <!-- Crystal Growth Lines -->
+  <line x1="150" y1="50" x2="150" y2="150" stroke="#88FFFF" stroke-width="1">
+    <animate attributeName="y2" values="50;150;50" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2s" repeatCount="indefinite"/>
+  </line>
+  
+  <line x1="350" y1="100" x2="350" y2="200" stroke="#FF88FF" stroke-width="1">
+    <animate attributeName="y2" values="100;200;100" dur="2.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2.5s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Crystal Nodes -->
+  <g>
+    <!-- Node 1 -->
+    <circle cx="150" cy="50" r="4" fill="#00FFFF">
+      <animate attributeName="r" values="2;4;2" dur="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="150" cy="50" r="8" fill="none" stroke="#00FFFF" stroke-width="1">
+      <animate attributeName="r" values="4;8;4" dur="1s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.5;0;0.5" dur="1s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Node 2 -->
+    <circle cx="350" cy="100" r="4" fill="#FF00FF">
+      <animate attributeName="r" values="2;4;2" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="350" cy="100" r="8" fill="none" stroke="#FF00FF" stroke-width="1">
+      <animate attributeName="r" values="4;8;4" dur="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.5;0;0.5" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Crystal Particles -->
+  <g>
+    <!-- Particle Group 1 -->
+    <path d="M150,50 L154,54 L150,58 L146,54 Z" fill="#00FFFF">
+      <animateTransform
+        attributeName="transform"
+        type="translate"
+        values="0,0; 20,-20; 0,0"
+        dur="2s"
+        repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Particle Group 2 -->
+    <path d="M350,100 L354,104 L350,108 L346,104 Z" fill="#FF00FF">
+      <animateTransform
+        attributeName="transform"
+        type="translate"
+        values="0,0; -20,20; 0,0"
+        dur="2.5s"
+        repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.5;1" dur="2.5s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- Crystal Growth Effects -->
+  <g>
+    <line x1="150" y1="50" x2="170" y2="70" stroke="#00FFFF" stroke-width="1">
+      <animate attributeName="x2" values="150;170;150" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="y2" values="50;70;50" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0;1" dur="3s" repeatCount="indefinite"/>
+    </line>
+    
+    <line x1="350" y1="100" x2="330" y2="120" stroke="#FF00FF" stroke-width="1">
+      <animate attributeName="x2" values="350;330;350" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="y2" values="100;120;100" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0;1" dur="2.5s" repeatCount="indefinite"/>
+    </line>
+  </g>
+
+  <!-- Ice/Crystal Color Glints -->
+  <circle cx="150" cy="50" r="2" fill="#FFFFFF">
+    <animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="350" cy="100" r="2" fill="#FFFFFF">
+    <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Label -->
+  <text x="400" y="350" fill="#FFFFFF" font-family="Arial" font-size="14" text-anchor="middle">
+    Crystalline Formation Preview
+  </text>
+  <text x="400" y="370" fill="#88AAFF" font-family="Arial" font-size="12" text-anchor="middle">
+    Geometric patterns form dashboard through crystal growth
+  </text>
+</svg>

@@ -1,0 +1,251 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Mic, Send, Settings, MessageSquare } from 'lucide-react';
+
+const AgentLeeInterface = () => {
+  const [textIndex, setTextIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
+  const [displayText, setDisplayText] = useState('');
+  
+  const outerAuraRef = useRef(null);
+  const softGlowRef = useRef(null);
+  const sparklingSphereRef = useRef(null);
+  
+  const texts = [
+    "HI. I am Agent Lee.",
+    "I am here to assist you.",
+    "Let me know how I can help assist you."
+  ];
+
+  // Typing animation effect
+  useEffect(() => {
+    let currentText = texts[textIndex];
+    let currentIndex = 0;
+
+    if (isTyping) {
+      const typingInterval = setInterval(() => {
+        if (currentIndex <= currentText.length) {
+          setDisplayText(currentText.slice(0, currentIndex));
+          currentIndex++;
+        } else {
+          setIsTyping(false);
+          clearInterval(typingInterval);
+          setTimeout(() => {
+            setIsTyping(true);
+            setTextIndex((prev) => (prev + 1) % texts.length);
+          }, 2000);
+        }
+      }, 50);
+
+      return () => clearInterval(typingInterval);
+    }
+  }, [textIndex, isTyping]);
+
+  // Canvas animation setup
+  useEffect(() => {
+    if (!outerAuraRef.current || !softGlowRef.current || !sparklingSphereRef.current) return;
+
+    const auraCtx = outerAuraRef.current.getContext('2d');
+    const glowCtx = softGlowRef.current.getContext('2d');
+    const sparkleCtx = sparklingSphereRef.current.getContext('2d');
+
+    const resizeCanvas = () => {
+      const size = Math.min(window.innerWidth * 0.4, window.innerHeight * 0.4);
+      
+      if (outerAuraRef.current) {
+        outerAuraRef.current.width = size * 2;
+        outerAuraRef.current.height = size * 2;
+      }
+      
+      if (softGlowRef.current) {
+        softGlowRef.current.width = size;
+        softGlowRef.current.height = size;
+      }
+      
+      if (sparklingSphereRef.current) {
+        sparklingSphereRef.current.width = size / 3;
+        sparklingSphereRef.current.height = size / 3;
+      }
+    };
+
+    class SparkParticle {
+      constructor(canvas) {
+        this.init(canvas);
+      }
+
+      init(canvas) {
+        this.angle = Math.random() * Math.PI * 2;
+        this.radius = Math.sqrt(Math.random()) * (canvas.width / 2) * 0.5;
+        this.x = canvas.width / 2 + Math.cos(this.angle) * this.radius;
+        this.y = canvas.height / 2 + Math.sin(this.angle) * this.radius;
+        this.size = Math.random() * 2 + 0.5;
+        this.speed = Math.random() * 0.04 + 0.01;
+      }
+
+      update() {
+        this.angle += this.speed;
+        this.x = sparklingSphereRef.current.width / 2 + Math.cos(this.angle) * this.radius;
+        this.y = sparklingSphereRef.current.height / 2 + Math.sin(this.angle) * this.radius;
+      }
+
+      draw(ctx) {
+        ctx.fillStyle = "rgba(255, 100, 255, 1)";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    const sparkParticles = Array.from({ length: 150 }, () => new SparkParticle(sparklingSphereRef.current));
+
+    const drawOuterAura = () => {
+      if (!outerAuraRef.current || !auraCtx) return;
+      
+      const canvas = outerAuraRef.current;
+      auraCtx.clearRect(0, 0, canvas.width, canvas.height);
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = canvas.width * 0.4;
+      
+      const gradient = auraCtx.createRadialGradient(centerX, centerY, radius * 0.5, centerX, centerY, radius);
+      gradient.addColorStop(0, "rgba(0, 0, 255, 0.7)");
+      gradient.addColorStop(1, "rgba(0, 0, 255, 0)");
+
+      auraCtx.fillStyle = gradient;
+      auraCtx.beginPath();
+      auraCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      auraCtx.fill();
+    };
+
+    const drawSoftGlow = () => {
+      if (!softGlowRef.current || !glowCtx) return;
+      
+      const canvas = softGlowRef.current;
+      glowCtx.clearRect(0, 0, canvas.width, canvas.height);
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = canvas.width * 0.3;
+
+      const gradient = glowCtx.createRadialGradient(centerX, centerY, radius * 0.5, centerX, centerY, radius);
+      gradient.addColorStop(0, "rgba(255, 0, 255, 0.6)");
+      gradient.addColorStop(1, "rgba(255, 0, 255, 0)");
+
+      glowCtx.fillStyle = gradient;
+      glowCtx.beginPath();
+      glowCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      glowCtx.fill();
+    };
+
+    const animate = () => {
+      drawOuterAura();
+      drawSoftGlow();
+
+      if (sparklingSphereRef.current && sparkleCtx) {
+        sparkleCtx.clearRect(0, 0, sparklingSphereRef.current.width, sparklingSphereRef.current.height);
+        sparkParticles.forEach(p => {
+          p.update();
+          p.draw(sparkleCtx);
+        });
+      }
+
+      animationFrame = requestAnimationFrame(animate);
+    };
+
+    let animationFrame;
+    resizeCanvas();
+    animate();
+
+    window.addEventListener('resize', resizeCanvas);
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      cancelAnimationFrame(animationFrame);
+    };
+  }, []);
+
+  // Load and initialize particles.js
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js';
+    script.async = true;
+    script.onload = () => {
+      window.particlesJS('particles-js', {
+        particles: {
+          number: { value: 80, density: { enable: true, value_area: 800 }},
+          color: { value: ["#00ffff", "#ff00ff", "#00ff00", "#ff0000", "#0000ff"] },
+          shape: { type: "circle" },
+          opacity: {
+            value: 0.5,
+            random: true,
+            anim: { enable: true, speed: 1, opacity_min: 0.2, sync: false }
+          },
+          size: {
+            value: 3,
+            random: true,
+            anim: { enable: true, speed: 2, size_min: 1, sync: false }
+          },
+          line_linked: {
+            enable: true,
+            distance: 150,
+            color: "#00ffff",
+            opacity: 0.4,
+            width: 1
+          },
+          move: {
+            enable: true,
+            speed: 2,
+            direction: "none",
+            random: true,
+            straight: false,
+            out_mode: "out",
+            bounce: false,
+            attract: { enable: true, rotateX: 600, rotateY: 1200 }
+          }
+        },
+        interactivity: {
+          detect_on: "canvas",
+          events: {
+            onhover: { enable: true, mode: "grab" },
+            onclick: { enable: true, mode: "push" },
+            resize: true
+          },
+          modes: {
+            grab: { distance: 140, line_linked: { opacity: 1 }},
+            push: { particles_nb: 4 }
+          }
+        },
+        retina_detect: true
+      });
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-black overflow-hidden relative">
+      <div id="particles-js" className="absolute inset-0 z-10" />
+      
+      <div id="orbContainer" className="absolute inset-0 flex items-center justify-center z-20">
+        <canvas ref={outerAuraRef} className="absolute" />
+        <canvas ref={softGlowRef} className="absolute" />
+        <canvas ref={sparklingSphereRef} className="absolute" />
+      </div>
+
+      <div className="relative z-30 h-screen flex flex-col items-center">
+        <div className="flex-1 flex items-center justify-center w-full">
+          {/* This empty div maintains space for the orb */}
+        </div>
+        <div className="mb-32 text-center">
+          <div className="text-2xl font-bold text-cyan-400 h-8">
+            {displayText}
+            <span className="animate-pulse">|</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AgentLeeInterface;

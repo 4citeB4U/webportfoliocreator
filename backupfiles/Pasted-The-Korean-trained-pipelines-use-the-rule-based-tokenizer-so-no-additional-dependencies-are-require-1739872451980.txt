@@ -1,0 +1,124 @@
+The Korean trained pipelines use the rule-based tokenizer, so no additional dependencies are required.
+
+Installing and using trained pipelines
+The easiest way to download a trained pipeline is via spaCy’s download command. It takes care of finding the best-matching package compatible with your spaCy installation.
+
+Important note for v3.0
+Note that as of spaCy v3.0, shortcut links like en that create (potentially brittle) symlinks in your spaCy installation are deprecated. To download and load an installed pipeline package, use its full name:
+
+- python -m spacy download en
++ python -m spacy download en_core_web_sm
+- nlp = spacy.load("en")
++ nlp = spacy.load("en_core_web_sm")
+# Download best-matching version of a package for your spaCy installation
+python -m spacy download en_core_web_sm
+
+# Download exact package version
+python -m spacy download en_core_web_sm-3.0.0 --direct
+The download command will install the package via pip and place the package in your site-packages directory.
+
+pip install -U spacy
+python -m spacy download en_core_web_sm
+import spacy
+nlp = spacy.load("en_core_web_sm")
+doc = nlp("This is a sentence.")
+If you’re in a Jupyter notebook or similar environment, you can use the ! prefix to execute commands. Make sure to restart your kernel or runtime after installation (just like you would when installing other Python packages) to make sure that the installed pipeline package can be found.
+
+!python -m spacy download en_core_web_sm
+Installation via pip
+To download a trained pipeline directly using pip, point pip install to the URL or local path of the wheel file or archive. Installing the wheel is usually more efficient.
+
+Pipeline Package URLs pipeline-urls
+Pretrained pipeline distributions are hosted on Github Releases, and you can find download links there, as well as on the model page. You can also get URLs directly from the command line by using spacy info with the --url flag, which may be useful for automation.
+
+spacy info en_core_web_sm --url
+This command will print the URL for the latest version of a pipeline compatible with the version of spaCy you’re using. Note that in order to look up the compatibility information an internet connection is required.
+
+# With external URL
+pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0-py3-none-any.whl
+pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz
+
+# Using spacy info to get the external URL
+pip install $(spacy info en_core_web_sm --url)
+
+# With local file
+pip install /Users/you/en_core_web_sm-3.0.0-py3-none-any.whl
+pip install /Users/you/en_core_web_sm-3.0.0.tar.gz
+By default, this will install the pipeline package into your site-packages directory. You can then use spacy.load to load it via its package name or import it explicitly as a module. If you need to download pipeline packages as part of an automated process, we recommend using pip with a direct link, instead of relying on spaCy’s download command.
+
+You can also add the direct download link to your application’s requirements.txt. For more details, see the section on working with pipeline packages in production.
+
+Manual download and installation
+In some cases, you might prefer downloading the data manually, for example to place it into a custom directory. You can download the package via your browser from the latest releases, or configure your own download script using the URL of the archive file. The archive consists of a package directory that contains another directory with the pipeline data.
+
+Directory structure
+└── en_core_web_md-3.0.0.tar.gz       # downloaded archive
+    ├── setup.py                      # setup file for pip installation
+    ├── meta.json                     # copy of pipeline meta
+    └── en_core_web_md                # 📦 pipeline package
+        ├── __init__.py               # init for pip installation
+        └── en_core_web_md-3.0.0      # pipeline data
+            ├── config.cfg            # pipeline config
+            ├── meta.json             # pipeline meta
+            └── ...                   # directories with component data
+You can place the pipeline package directory anywhere on your local file system.
+
+Installation from Python
+Since the spacy download command installs the pipeline as a Python package, we always recommend running it from the command line, just like you install other Python packages with pip install. However, if you need to, or if you want to integrate the download process into another CLI command, you can also import and call the download function used by the CLI via Python.
+
+Keep in mind that the download command installs a Python package into your environment. In order for it to be found after installation, you will need to restart or reload your Python process so that new packages are recognized.
+
+import spacy
+spacy.cli.download("en_core_web_sm")
+Using trained pipelines with spaCy
+To load a pipeline package, use spacy.load with the package name or a path to the data directory:
+
+Important note for v3.0
+Note that as of spaCy v3.0, shortcut links like en that create (potentially brittle) symlinks in your spaCy installation are deprecated. To download and load an installed pipeline package, use its full name:
+
+- python -m spacy download en
++ python -m spacy download en_core_web_sm
+import spacy
+nlp = spacy.load("en_core_web_sm")           # load package "en_core_web_sm"
+nlp = spacy.load("/path/to/en_core_web_sm")  # load package from a directory
+
+doc = nlp("This is a sentence.")
+💡Tip: Preview model info
+You can use the info command or spacy.info() method to print a pipeline package’s meta data before loading it. Each Language object with a loaded pipeline also exposes the pipeline’s meta data as the attribute meta. For example, nlp.meta['version'] will return the package version.
+
+Importing pipeline packages as modules
+If you’ve installed a trained pipeline via spacy download or directly via pip, you can also import it and then call its load() method with no arguments:
+
+Editable Code
+spaCy v3.7 · Python 3 · via Binder
+import en_core_web_sm
+
+nlp = en_core_web_sm.load()
+doc = nlp("This is a sentence.")
+
+run
+How you choose to load your trained pipelines ultimately depends on personal preference. However, for larger code bases, we usually recommend native imports, as this will make it easier to integrate pipeline packages with your existing build process, continuous integration workflow and testing framework. It’ll also prevent you from ever trying to load a package that is not installed, as your code will raise an ImportError immediately, instead of failing somewhere down the line when calling spacy.load(). For more details, see the section on working with pipeline packages in production.
+
+Using trained pipelines in production
+If your application depends on one or more trained pipeline packages, you’ll usually want to integrate them into your continuous integration workflow and build process. While spaCy provides a range of useful helpers for downloading and loading pipeline packages, the underlying functionality is entirely based on native Python packaging. This allows your application to handle a spaCy pipeline like any other package dependency.
+
+Downloading and requiring package dependencies
+spaCy’s built-in download command is mostly intended as a convenient, interactive wrapper. It performs compatibility checks and prints detailed error messages and warnings. However, if you’re downloading pipeline packages as part of an automated build process, this only adds an unnecessary layer of complexity. If you know which packages your application needs, you should be specifying them directly.
+
+Because pipeline packages are valid Python packages, you can add them to your application’s requirements.txt. If you’re running your own internal PyPi installation, you can upload the pipeline packages there. pip’s requirements file format supports both package names to download via a PyPi server, as well as direct URLs. For instance, you can specify the en_core_web_sm model for spaCy 3.7.x as follows:
+
+requirements.txt
+spacy>=3.0.0,<4.0.0
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+See the list of models for model download links for the current spaCy version.
+
+All pipeline packages are versioned and specify their spaCy dependency. This ensures cross-compatibility and lets you specify exact version requirements for each pipeline. If you’ve trained your own pipeline, you can use the spacy package command to generate the required meta data and turn it into a loadable package.
+
+Loading and testing pipeline packages
+Pipeline packages are regular Python packages, so you can also import them as a package using Python’s native import syntax, and then call the load method to load the data and return an nlp object:
+
+import en_core_web_sm
+nlp = en_core_web_sm.load()
+In general, this approach is recommended for larger code bases, as it’s more “native”, and doesn’t rely on spaCy’s loader to resolve string names to packages. If a package can’t be imported, Python will raise an ImportError immediately. And if a package is imported but not used, any linter will catch that.
+
+Similarly, it’ll give you more flexibility when writing tests that require loading pipelines. For example, instead of writing your own try and except logic around spaCy’s loader, you can use pytest’s importorskip() method to only run a test if a specific pipeline package or version is installed. Each pipeline package exposes a __version__ attribute which you can also use to perform your own version compatibility checks before loading it.

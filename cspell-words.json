@@ -1,0 +1,27 @@
+{
+  "words": [
+    "wouter",
+    "supabase",
+    "neondatabase",
+    "ntvs",
+    "njsproj",
+    "ehthumbs",
+    "qrcode",
+    "plpgsql",
+    "datname",
+    "apos",
+    "rsquo",
+    "lsquo",
+    "doesn",
+    "nbsp",
+    "mdash",
+    "ndash",
+    "droppable",
+    "draggable",
+    "tailwindcss",
+    "postcss"
+  ],
+  "version": "0.2",
+  "flagWords": [],
+  "allowCompoundWords": true
+}

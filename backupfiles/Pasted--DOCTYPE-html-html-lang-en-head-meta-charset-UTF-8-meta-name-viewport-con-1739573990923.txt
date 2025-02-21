@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Driver Academy - Business Plan</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --purple: #8884d8;
+            --light-blue: #82b1d8;
+            --light-green: #82d8a8;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .cover-page {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 3rem;
+            background: linear-gradient(to bottom, white, #f7f7f7);
+        }
+
+        .cover-page h1 {
+            font-size: 2.5rem;
+            color: var(--purple);
+            margin-bottom: 1rem;
+        }
+
+        .cover-page h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .prepared-for {
+            max-width: 600px;
+            margin: 2rem auto;
+            text-align: left;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--purple);
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-container {
+            height: 400px;
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .card {
+            background: #f7f7f7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .card ul {
+            list-style: none;
+        }
+
+        .card li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .card li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .cover-page {
+                padding: 2rem 1rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cover Page -->
+        <div class="cover-page">
+            <h1>Pro Driver Academy</h1>
+            <h2>Comprehensive Business Plan</h2>
+            <p style="color: #666;">October 2024</p>
+            <div class="prepared-for">
+                <p style="font-size: 0.875rem; color: #666;">Prepared for:</p>
+                <p style="font-weight: 600;">Financial Institutions</p>
+                <p style="font-weight: 600;">Philanthropic Organizations</p>
+                <p style="font-weight: 600;">Grant-Making Bodies</p>
+            </div>
+        </div>
+
+        <!-- Executive Financial Dashboard -->
+        <section class="section">
+            <h2 class="section-title">Executive Financial Dashboard</h2>
+            
+            <!-- 3-Year Financial Summary -->
+            <div class="chart-container">
+                <canvas id="financialSummaryChart"></canvas>
+            </div>
+
+            <!-- Monthly Cash Flow Analysis -->
+            <div class="chart-container">
+                <canvas id="cashFlowChart"></canvas>
+            </div>
+
+            <!-- Funding Sources -->
+            <div class="chart-container">
+                <canvas id="fundingSourcesChart"></canvas>
+            </div>
+
+            <!-- Social Impact Metrics -->
+            <div class="chart-container">
+                <canvas id="socialImpactChart"></canvas>
+            </div>
+
+            <!-- Cost per Student Analysis -->
+            <div class="chart-container">
+                <canvas id="costPerStudentChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Key Financial Highlights -->
+        <section class="section">
+            <h2 class="section-title">Key Financial Highlights</h2>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h3>Financial Sustainability</h3>
+                    <ul>
+                        <li>Projected Year 3 Revenue: $450,000</li>
+                        <li>Operating Surplus Growth: 250% by Year 3</li>
+                        <li>Cost Recovery: 118% by Year 3</li>
+                        <li>Diversified Revenue Streams</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Social Return on Investment</h3>
+                    <ul>
+                        <li>Job Placement Rate: 85%</li>
+                        <li>Average Graduate Salary: $65,000</li>
+                        <li>Community Economic Impact: $1.75M/year</li>
+                        <li>Industry Gap Fulfillment: 45%</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Risk Management & Compliance -->
+        <section class="section">
+            <h2 class="section-title">Risk Management & Compliance</h2>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>Financial Controls</h3>
+                    <ul>
+                        <li>Annual External Audits</li>
+                        <li>Monthly Financial Reviews</li>
+                        <li>Grant Compliance Monitoring</li>
+                        <li>Regular Board Oversight</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Operational Risk Management</h3>
+                    <ul>
+                        <li>Comprehensive Insurance Coverage</li>
+                        <li>Safety Protocol Implementation</li>
+                        <li>Regular Equipment Maintenance</li>
+                        <li>Staff Training Programs</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Compliance Framework</h3>
+                    <ul>
+                        <li>DOT Regulations</li>
+                        <li>FMCSA Requirements</li>
+                        <li>State Education Standards</li>
+                        <li>501(c)(3) Compliance</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Data
+        const monthlyFinancials = [
+            { month: 'Jan Y1', revenue: 12500, expenses: 10800, cashFlow: 1700, students: 5 },
+            { month: 'Feb Y1', revenue: 15000, expenses: 11200, cashFlow: 3800, students: 6 },
+            { month: 'Mar Y1', revenue: 17500, expenses: 11500, cashFlow: 6000, students: 7 },
+            { month: 'Q2 Y1', revenue: 55000, expenses: 35000, cashFlow: 20000, students: 22 },
+            { month: 'Q3 Y1', revenue: 75000, expenses: 48000, cashFlow: 27000, students: 30 },
+            { month: 'Q4 Y1', revenue: 90000, expenses: 55000, cashFlow: 35000, students: 36 }
+        ];
+
+        const financialSummary = [
+            { year: '2025', revenue: 150000, expenses: 130000, surplus: 20000, roi: 15.4 },
+            { year: '2026', revenue: 300000, expenses: 250000, surplus: 50000, roi: 20.0 },
+            { year: '2027', revenue: 450000, expenses: 380000, surplus: 70000, roi: 18.4 }
+        ];
+
+        const fundingSources = [
+            { source: 'Program Fees', value: 50 },
+            { source: 'Government Grants', value: 25 },
+            { source: 'Corporate Sponsorships', value: 15 },
+            { source: 'Philanthropic Donations', value: 10 }
+        ];
+
+        const socialImpactData = [
+            { metric: 'Job Placement Rate', value: 85 },
+            { metric: 'Average Salary Increase', value: 65 },
+            { metric: 'Community ROI', value: 175 },
+            { metric: 'Industry Need Fulfillment', value: 45 }
+        ];
+
+        const costPerStudentData = [
+            { category: 'Instruction', cost: 2500 },
+            { category: 'Equipment', cost: 1200 },
+            { category: 'Materials', cost: 800 },
+            { category: 'Administration', cost: 500 }
+        ];
+
+        // Chart Creation
+        window.onload = function() {
+            // Financial Summary Chart
+            new Chart(document.getElementById('financialSummaryChart'), {
+                type: 'bar',
+                data: {
+                    labels: financialSummary.map(item => item.year),
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: financialSummary.map(item => item.revenue),
+                            backgroundColor: '#8884d8'
+                        },
+                        {
+                            label: 'Expenses',
+                            data: financialSummary.map(item => item.expenses),
+                            backgroundColor: '#82b1d8'
+                        },
+                        {
+                            label: 'Operating Surplus',
+                            data: financialSummary.map(item => item.surplus),
+                            backgroundColor: '#82d8a8'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Cash Flow Chart
+            new Chart(document.getElementById('cashFlowChart'), {
+                type: 'line',
+                data: {
+                    labels: monthlyFinancials.map(item => item.month),
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: monthlyFinancials.map(item => item.revenue),
+                            borderColor: '#8884d8',
+                            fill: false
+                        },
+                        {
+                            label: 'Expenses',
+                            data: monthlyFinancials.map(item => item.expenses),
+                            borderColor: '#82b1d8',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Funding Sources Chart
+            new Chart(document.getElementById('fundingSourcesChart'), {
+                type: 'pie',
+                data: {
+                    labels: fundingSources.map(item => item.source),
+                    datasets: [{
+                        data: fundingSources.map(item => item.value),
+                        backgroundColor: ['#8884d8', '#82b1d8', '#82d8a8', '#b794f4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Social Impact Chart
+            new Chart(document.getElementById('socialImpactChart'), {
+                type: 'bar',
+                data: {
+                    labels: socialImpactData.map(item => item.metric),
+                    datasets: [{
+                        label: 'Impact Metrics (%)',
+                        data: socialImpactData.map(item => item.value),
+                        backgroundColor: '#8884d8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y'
+                }
+            });
+
+            // Cost per Student Chart
+            new Chart(document.getElementById('costPerStudentChart'), {
+                type: 'pie',
+                data: {
+                    labels: costPerStudentData.map(item => item.category),
+                    datasets: [{
+                        data: costPerStudentData.map(item => item.cost),
+                        backgroundColor: ['#8884d8', '#82b1d8', '#82d8a8', '#b794f4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        };
+    </script>
+</body>
+</html>

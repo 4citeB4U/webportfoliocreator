@@ -1,0 +1,71 @@
+// client/src/hooks/use-particles.ts
+import { useEffect, useRef } from 'react';
+import { loadSlim } from '@tsparticles/slim';
+import type { Container, Engine, ISourceOptions } from '@tsparticles/engine';
+
+export const useParticles = (
+  containerRef: React.RefObject<HTMLElement>,
+  options: ISourceOptions
+) => {
+  useEffect(() => {
+    let container: Container | undefined;
+
+    const initParticles = async () => {
+      if (!containerRef.current) return;
+      try {
+        // Load the slim engine (core functionality only)
+        const engine: Engine = await loadSlim();
+        // Initialize the particles container with a simplified configuration
+        container = await engine.load(containerRef.current, {
+          fpsLimit: 120,
+          background: {
+            color: {
+              value: options.background?.color?.value || "#000000",
+            },
+          },
+          particles: {
+            number: {
+              value: options.particles?.number?.value || 50,
+              density: {
+                enable: true,
+                area: 800,
+              },
+            },
+            color: {
+              value: options.particles?.color?.value || "#ffffff",
+            },
+            shape: {
+              type: options.particles?.shape?.type || "circle",
+            },
+            opacity: {
+              value: options.particles?.opacity?.value || 0.4,
+            },
+            size: {
+              value: options.particles?.size?.value || { min: 2, max: 6 },
+            },
+            move: {
+              enable: true,
+              speed: options.particles?.move?.speed || 2,
+              direction: options.particles?.move?.direction || "none",
+              random: options.particles?.move?.random || false,
+              straight: options.particles?.move?.straight || false,
+              outModes: {
+                default: "out",
+              },
+            },
+          },
+          detectRetina: true,
+        });
+      } catch (error) {
+        console.error("Error initializing particles:", error);
+      }
+    };
+
+    initParticles();
+
+    // Cleanup on unmount
+    return () => {
+      container?.destroy();
+    };
+  }, [containerRef, options]);
+};

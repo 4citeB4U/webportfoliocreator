@@ -1,0 +1,444 @@
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { Volume2, ChevronLeft, ChevronRight, Gift, Settings, Home, X } from 'lucide-react';
+import { PaymentOverlay } from '@/components/PaymentOverlay';
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import LeolasBackground from '@/components/LeolasBackground';
+import { NEEDLE_AND_YARN_CONTENT } from '../content/needle-and-yarn';
+import { StoryTransition } from '@/components/StoryTransition';
+
+const BOOK_CONTENT = {
+  'needle-and-yarn': NEEDLE_AND_YARN_CONTENT,
+  'crochet-mastery': `Crochet Mastery Guide
+By Leola (Sista) Lee
+
+Chapter 1: The Essentials
+
+To begin your crochet journey, you'll need a few essential tools. First, you'll need crochet hooks. They come in different sizes, usually measured in millimeters. A good range for beginners is between 3.5mm and 6mm. You'll also need yarn, and for learning, a medium-weight (worsted weight) yarn in acrylic or cotton is a great choice. Pick a light, solid color so you can easily see your stitches. Don't forget a pair of small, sharp scissors for cutting the yarn, some stitch markers to help you keep track of your place, a flexible tape measure, and a yarn needle (also called a tapestry needle) for weaving in loose ends.
+
+Chapter 2: Understanding Your Tools
+
+Your crochet hook is your main tool. It has a point at the very tip for inserting into stitches, a throat (the angled, hooked part) for catching the yarn, a shaft (the working area where stitches are formed), a thumb rest for a comfortable grip, and a handle. You can hold the hook in a couple of ways: like a pencil (pencil grip) or like a knife (knife grip or overhand grip). Experiment to see which feels best. Holding the yarn is just as important, as it controls your tension. A common method is to drape the yarn over your index finger, under your middle finger, and over your ring and pinky fingers. The working yarn (coming from the ball) should be held between your thumb and middle finger, close to the hook. This lets you control the flow with your index finger.
+
+Chapter 3: Getting Started
+
+The very first step in almost every crochet project is making a slip knot. To do this, wrap the yarn around your index and middle fingers to make a loop. Then, insert your hook under the first strand and over the second strand in the loop. Catch the working yarn with your hook and pull it through the loop. Gently tighten the knot on your hook – not too tight, not too loose, just right.
+
+Now, you're ready for the chain stitch, the foundation of many projects. With the slip knot on your hook, "yarn over" by wrapping the working yarn around the hook from back to front. Then, use the hook to draw that yarn through the loop already on your hook. That's one chain stitch! Keep doing that – yarn over, draw through – to make a chain as long as you need. Try to keep your chains even, like a steady heartbeat.
+
+Chapter 4: Basic Stitches
+
+The single crochet is a fundamental stitch. To make one, insert your hook into the next stitch (or chain, if you're working into a foundation chain). Yarn over and draw the yarn through the stitch. You'll have two loops on your hook. Yarn over again and draw the yarn through both loops on your hook. That's one single crochet. When working in rows, you'll typically chain one at the end of each row (this is your "turning chain," and it doesn't count as a stitch) and then turn your work to start the next row. Always work into the very first and very last stitch of each row to keep your edges straight.
+
+Chapter 5: Advanced Techniques
+
+As you progress, you'll learn more complex stitches like the half double crochet, double crochet, and treble crochet. Each of these stitches builds upon the basics you've learned. The half double crochet is taller than a single crochet but shorter than a double crochet, making it perfect for projects that need a medium height stitch. To work a half double crochet, yarn over, insert your hook into the stitch, yarn over and pull through the stitch (three loops on hook), then yarn over and pull through all three loops at once.
+
+Chapter 6: Pattern Reading
+
+Learning to read patterns is crucial for advancing your crochet skills. Patterns use abbreviations to save space and make instructions clearer. Common abbreviations include:
+- ch (chain)
+- sc (single crochet)
+- hdc (half double crochet)
+- dc (double crochet)
+- st(s) (stitch/stitches)
+- sl st (slip stitch)
+Numbers before these abbreviations tell you how many times to do the stitch. For example, "3 dc" means "make 3 double crochet stitches."
+
+Chapter 7: Project Planning
+
+When starting a project, always check your gauge. Make a test swatch using the recommended hook size and yarn, then measure it to ensure your stitches match the pattern's gauge. If your swatch is too small, try a larger hook; if it's too big, use a smaller hook. This step is especially important for garments where size matters.
+
+Chapter 8: Troubleshooting
+
+Common issues you might encounter include:
+- Uneven edges: Usually caused by missing the first or last stitch in rows
+- Increasing stitch count: Often from adding extra stitches at row ends
+- Decreasing stitch count: Usually from skipping stitches
+- Holes in your work: Could be from missed stitches or inconsistent tension
+Remember that practice makes perfect, and even experienced crocheters sometimes need to undo and redo their work.
+
+Chapter 9: Care and Maintenance
+
+Different yarns require different care. Always save the yarn label for care instructions. Generally:
+- Acrylic yarns can be machine washed and dried
+- Wool may need hand washing and laying flat to dry
+- Cotton can usually be machine washed but may shrink in high heat
+Store your finished projects in a cool, dry place away from direct sunlight to prevent fading.
+
+Chapter 10: Beyond the Basics
+
+As you become more comfortable with basic techniques, explore:
+- Working in the round
+- Color changing
+- Different stitch patterns
+- Reading charts
+- Creating texture
+- Working with different yarn weights
+Each new technique opens up possibilities for creating unique, beautiful projects.
+
+Remember: Practice makes perfect! Take your time, be patient with yourself, and enjoy the journey of learning this beautiful craft. Every stitch you make is a step forward in your crochet mastery.
+
+With love and stitches,
+Leola Lee`
+};
+
+interface BookPageProps {
+  bookId?: string;
+}
+
+const detectCharacter = (text: string): 'needle' | 'yarn' | 'scissors' | 'thimble' | 'measuring-tape' => {
+  const characterMentions = {
+    needle: (text.match(/Needle/g) || []).length,
+    yarn: (text.match(/Yarn/g) || []).length,
+    scissors: (text.match(/Scissors/g) || []).length,
+    thimble: (text.match(/Thimble/g) || []).length,
+    'measuring-tape': (text.match(/Measuring Tape/g) || []).length,
+  };
+
+  return Object.entries(characterMentions)
+    .reduce((a, b) => a[1] > b[1] ? a : b)[0] as 'needle' | 'yarn' | 'scissors' | 'thimble' | 'measuring-tape';
+};
+
+
+export default function BookPage({ bookId = 'needle-and-yarn' }: BookPageProps) {
+  const [currentPage, setCurrentPage] = useState(0);
+  const [showPayment, setShowPayment] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [fontSize, setFontSize] = useState(16);
+  const [particleCount, setParticleCount] = useState(50);
+  const [speechRate, setSpeechRate] = useState(1);
+  const [selectedVoice, setSelectedVoice] = useState<string>('Microsoft Aria Online');
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [, navigate] = useLocation();
+
+  const speechSynthesis = useRef<SpeechSynthesis | null>(null);
+  const currentUtterance = useRef<SpeechSynthesisUtterance | null>(null);
+  const textContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.speechSynthesis) {
+      speechSynthesis.current = window.speechSynthesis;
+      const loadVoices = () => {
+        const voices = speechSynthesis.current?.getVoices() || [];
+        setAvailableVoices(voices);
+
+        const ariaVoice = voices.find(voice => voice.name === 'Microsoft Aria Online');
+        if (ariaVoice) {
+          setSelectedVoice(ariaVoice.name);
+        }
+      };
+
+      speechSynthesis.current.onvoiceschanged = loadVoices;
+      loadVoices();
+
+      return () => {
+        if (currentUtterance.current) {
+          speechSynthesis.current?.cancel();
+          currentUtterance.current = null;
+        }
+      };
+    }
+  }, []);
+
+  const content = BOOK_CONTENT[bookId as keyof typeof BOOK_CONTENT] || BOOK_CONTENT['needle-and-yarn'];
+  const bookTitle = bookId === 'crochet-mastery' ? 'Crochet Mastery' : 'Needle & Yarn: A Love Stitched in Time';
+
+  // Improved page splitting logic
+  const pages = useMemo(() => {
+    const sections = content.split('\n\n');
+    const result: string[] = [];
+    let currentPage = '';
+
+    for (const section of sections) {
+      // Check if adding this section would exceed our target length
+      if (currentPage.length + section.length > 2000) {
+        // If current page isn't empty, push it to results
+        if (currentPage) {
+          result.push(currentPage.trim());
+          currentPage = '';
+        }
+
+        // If section is very long, split it into smaller chunks
+        if (section.length > 2000) {
+          const sentences = section.split('. ');
+          let chunk = '';
+
+          for (const sentence of sentences) {
+            if (chunk.length + sentence.length > 1800) {
+              result.push(chunk.trim());
+              chunk = '';
+            }
+            chunk += sentence + '. ';
+          }
+
+          if (chunk) {
+            currentPage = chunk;
+          }
+        } else {
+          currentPage = section;
+        }
+      } else {
+        // Add section to current page
+        currentPage += (currentPage ? '\n\n' : '') + section;
+      }
+    }
+
+    // Add the last page if not empty
+    if (currentPage) {
+      result.push(currentPage.trim());
+    }
+
+    return result;
+  }, [content]);
+
+  const totalPages = pages.length;
+
+  const speak = (text: string) => {
+    if (speechSynthesis.current) {
+      stopSpeaking();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      const selectedVoiceObj = availableVoices.find(voice => voice.name === selectedVoice);
+
+      if (selectedVoiceObj) {
+        utterance.voice = selectedVoiceObj;
+      }
+
+      utterance.rate = speechRate;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        currentUtterance.current = null;
+      };
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        currentUtterance.current = null;
+      };
+
+      currentUtterance.current = utterance;
+      speechSynthesis.current.speak(utterance);
+    }
+  };
+
+  const stopSpeaking = () => {
+    if (speechSynthesis.current && currentUtterance.current) {
+      speechSynthesis.current.cancel();
+      currentUtterance.current = null;
+      setIsSpeaking(false);
+    }
+  };
+
+  const readCurrentPage = () => {
+    speak(pages[currentPage]);
+  };
+
+  useEffect(() => {
+    stopSpeaking();
+  }, [currentPage]);
+
+  return (
+    <div className="min-h-screen relative">
+      <div className="fixed inset-0 w-full h-full overflow-hidden">
+        <LeolasBackground particleCount={particleCount} />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 py-4 flex flex-col min-h-screen">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={() => navigate('/projects/leolas-library')}
+              title="Return to Library"
+            >
+              <Home className="h-6 w-6" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={readCurrentPage}
+              disabled={isSpeaking}
+              className={isSpeaking ? 'animate-pulse' : ''}
+              title="Read Page"
+            >
+              <Volume2 className="h-6 w-6" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+            >
+              <Settings className="h-6 w-6" />
+            </Button>
+          </div>
+
+          <div className="text-center flex-grow">
+            <h1 className="text-xl font-semibold text-white">{bookTitle}</h1>
+            <p className="text-sm text-gray-300">Page {currentPage + 1} of {totalPages}</p>
+          </div>
+
+          <Button
+            variant="secondary"
+            onClick={() => setShowPayment(true)}
+          >
+            <Gift className="w-4 h-4 mr-2" />
+            Support the Author
+          </Button>
+        </div>
+
+        <div className="flex-grow rounded-lg shadow-xl overflow-hidden border border-blue-500/20 bg-black/40 backdrop-blur">
+          <div
+            ref={textContainerRef}
+            className="h-full overflow-y-auto p-8 prose prose-invert max-w-none"
+            style={{ fontSize: `${fontSize}px` }}
+          >
+            <div className="max-w-3xl mx-auto">
+              <StoryTransition 
+                character={detectCharacter(pages[currentPage])}
+                isVisible={true}
+              >
+                {pages[currentPage].split('\n').map((line, index) => {
+                  if (line.trim() === '') {
+                    return <br key={index} />;
+                  }
+                  return (
+                    <p
+                      key={index}
+                      className="mb-4 leading-relaxed whitespace-pre-wrap text-gray-100"
+                      onClick={(e) => {
+                        if (e.target === e.currentTarget) {
+                          speak(line);
+                        }
+                      }}
+                    >
+                      {line.split(' ').map((word, wordIndex) => (
+                        <span
+                          key={wordIndex}
+                          className="cursor-pointer hover:text-blue-300 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            speak(word);
+                          }}
+                        >
+                          {word}{' '}
+                        </span>
+                      ))}
+                    </p>
+                  );
+                })}
+              </StoryTransition>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            stopSpeaking();
+            setCurrentPage(prev => Math.max(0, prev - 1));
+          }}
+          disabled={currentPage === 0}
+          className="fixed left-4 top-1/2 -translate-y-1/2 z-20 h-[80vh] px-8 flex items-center justify-center transition-opacity hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed opacity-70"
+        >
+          <ChevronLeft className="w-8 h-8" />
+        </button>
+
+        <button
+          onClick={() => {
+            stopSpeaking();
+            setCurrentPage(prev => Math.min(totalPages - 1, prev + 1));
+          }}
+          disabled={currentPage === totalPages - 1}
+          className="fixed right-4 top-1/2 -translate-y-1/2 z-20 h-[80vh] px-8 flex items-center justify-center transition-opacity hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed opacity-70"
+        >
+          <ChevronRight className="w-8 h-8" />
+        </button>
+
+        {showSettings && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+            <div className="bg-zinc-900 rounded-lg p-6 max-w-md w-full mx-4 space-y-6 border border-blue-500/30">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-gray-200">Settings</h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowSettings(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-200">Font Size</label>
+                  <Slider
+                    value={[fontSize]}
+                    onValueChange={([value]) => setFontSize(value)}
+                    min={12}
+                    max={24}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-200">Background Particles</label>
+                  <Slider
+                    value={[particleCount]}
+                    onValueChange={([value]) => setParticleCount(value)}
+                    min={20}
+                    max={100}
+                    step={10}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-200">Speech Rate</label>
+                  <Slider
+                    value={[speechRate]}
+                    onValueChange={([value]) => setSpeechRate(value)}
+                    min={0.5}
+                    max={2}
+                    step={0.1}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-200">Voice</label>
+                  <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a voice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableVoices.map((voice) => (
+                        <SelectItem key={voice.name} value={voice.name}>
+                          {voice.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showPayment && (
+          <PaymentOverlay
+            isOpen={showPayment}
+            onClose={() => setShowPayment(false)}
+            bookTitle={bookTitle}
+          />
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,278 @@
+import { useEffect, useRef } from 'react';
+
+class DigitalRingClass {
+  constructor(radius, depth, particleCount, index) {
+    // Initialize properties
+    this.radius = radius;
+    this.baseRadius = radius;
+    this.depth = depth;
+    this.index = index;
+    this.rotationAngle = 0;
+    this.particles = [];
+    this.zPosition = depth;
+    this.color = colors[Math.min(index, colors.length - 1)];
+    this.speed = 0.5 + (index * 0.2);
+    this.dataStreams = [];
+
+    // Initialize data streams
+    for (let i = 0; i < 16; i++) {
+      this.dataStreams.push({
+        angle: (i / 16) * Math.PI * 2,
+        text: binaryStrings[Math.floor(Math.random() * binaryStrings.length)],
+        speed: 0.02 + Math.random() * 0.03,
+        opacity: 0.3 + Math.random() * 0.7
+      });
+    }
+
+    // Initialize particles
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2;
+      this.particles.push({
+        angle,
+        baseAngle: angle,
+        radius: this.radius,
+        size: 2 + Math.random() * 2,
+        pulseSpeed: 0.02 + Math.random() * 0.03,
+        dataIndex: Math.floor(Math.random() * binaryStrings.length)
+      });
+    }
+  }
+
+  update(deltaTime, currentTime) {
+    this.rotationAngle += this.speed * 0.01;
+    this.zPosition -= 0.5;
+    if (this.zPosition < -500) {
+      this.zPosition = 200;
+    }
+
+    // Update data streams
+    this.dataStreams.forEach(stream => {
+      stream.opacity = 0.3 + Math.abs(Math.sin(currentTime * stream.speed)) * 0.7;
+    });
+
+    // Update particles
+    this.particles.forEach(particle => {
+      particle.angle = particle.baseAngle + this.rotationAngle;
+      if (Math.random() < 0.01) {
+        particle.dataIndex = Math.floor(Math.random() * binaryStrings.length);
+      }
+    });
+  }
+
+  draw(ctx, centerX, centerY) {
+    const scale = Math.max(0.1, (1000 + this.zPosition) / 1000);
+    const opacity = Math.max(0.1, (1000 + this.zPosition) / 1000);
+    const drawRadius = this.radius * scale;
+
+    // Draw circuit patterns
+    ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${opacity * 0.3})`;
+    ctx.lineWidth = 1 * scale;
+
+    for (let i = 0; i < 24; i++) {
+      const angle = (i / 24) * Math.PI * 2 + this.rotationAngle;
+      const innerRadius = drawRadius * 0.9;
+      const outerRadius = drawRadius * 1.1;
+
+      ctx.beginPath();
+      ctx.moveTo(
+        centerX + Math.cos(angle) * innerRadius,
+        centerY + Math.sin(angle) * innerRadius
+      );
+      ctx.lineTo(
+        centerX + Math.cos(angle) * outerRadius,
+        centerY + Math.sin(angle) * outerRadius
+      );
+
+      // Add circuit nodes
+      if (i % 3 === 0) {
+        ctx.arc(
+          centerX + Math.cos(angle) * outerRadius,
+          centerY + Math.sin(angle) * outerRadius,
+          2 * scale, 0, Math.PI * 2
+        );
+      }
+      ctx.stroke();
+    }
+
+    // Draw data streams
+    ctx.font = `${10 * scale}px monospace`;
+    this.dataStreams.forEach(stream => {
+      const x = centerX + Math.cos(stream.angle + this.rotationAngle) * drawRadius;
+      const y = centerY + Math.sin(stream.angle + this.rotationAngle) * drawRadius;
+
+      ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${stream.opacity * opacity})`;
+      ctx.fillText(stream.text, x, y);
+    });
+
+    // Draw particles with digital effect
+    ctx.shadowBlur = 10 * scale;
+    ctx.shadowColor = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${opacity})`;
+
+    this.particles.forEach(particle => {
+      const x = centerX + Math.cos(particle.angle) * (particle.radius * scale);
+      const y = centerY + Math.sin(particle.angle) * (particle.radius * scale);
+
+      ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${opacity})`;
+      if (Math.random() < 0.5) {
+        ctx.fillText(
+          binaryStrings[particle.dataIndex],
+          x - 5 * scale,
+          y
+        );
+      } else {
+        ctx.beginPath();
+        ctx.arc(x, y, particle.size * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+
+    ctx.shadowBlur = 0;
+  }
+}
+
+const colors = [
+  { r: 0, g: 255, b: 255 },    // Bright Cyan
+  { r: 0, g: 200, b: 255 },    // Digital Blue
+  { r: 0, g: 150, b: 255 },    // Tech Blue
+  { r: 0, g: 100, b: 255 }     // Deep Digital
+];
+
+const binaryStrings = ['01', '10', '00', '11'];
+
+export default function CyberAnimation() {
+  const canvasRef = useRef(null);
+  const animationFrameRef = useRef();
+  const ringsRef = useRef([]);
+  const lastTimeRef = useRef(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    function initRings() {
+      ringsRef.current = [];
+      const baseRadius = Math.min(width, height) * 0.3;
+
+      for (let i = 0; i < 8; i++) {
+        const radius = baseRadius * (0.7 + i * 0.1);
+        const depth = i * 100;
+        ringsRef.current.push(new DigitalRingClass(radius, depth, 30 + i * 5, i));
+      }
+    }
+
+    function drawCyberCore(centerX, centerY) {
+      const radius = Math.min(width, height) * 0.15;
+
+      // Draw hexagonal frame
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+      ctx.fill();
+
+      // Draw circuit pattern
+      ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const x1 = centerX + Math.cos(angle) * (radius * 0.7);
+        const y1 = centerY + Math.sin(angle) * (radius * 0.7);
+        const x2 = centerX + Math.cos(angle) * radius;
+        const y2 = centerY + Math.sin(angle) * radius;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        // Add circuit nodes
+        ctx.beginPath();
+        ctx.arc(x1, y1, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+        ctx.fill();
+      }
+
+      // Draw AI text with digital effect
+      ctx.font = `bold ${radius * 0.6}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Digital glitch effect
+      if (Math.random() < 0.1) {
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
+        ctx.fillText('AI', centerX + 2, centerY);
+      }
+
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#0ff';
+      ctx.fillStyle = '#fff';
+      ctx.fillText('AI', centerX, centerY);
+      ctx.shadowBlur = 0;
+
+      // Draw scanning line
+      const scanY = centerY + Math.sin(Date.now() * 0.002) * radius * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(centerX - radius, scanY);
+      ctx.lineTo(centerX + radius, scanY);
+      ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function animate(currentTime) {
+      if (!lastTimeRef.current) lastTimeRef.current = currentTime;
+      const deltaTime = currentTime - lastTimeRef.current;
+      lastTimeRef.current = currentTime;
+
+      ctx.clearRect(0, 0, width, height);
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      // Sort rings by z-position
+      ringsRef.current.sort((a, b) => b.zPosition - a.zPosition);
+
+      // Update and draw rings
+      ringsRef.current.forEach(ring => {
+        ring.update(deltaTime, currentTime);
+        ring.draw(ctx, centerX, centerY);
+      });
+
+      drawCyberCore(centerX, centerY);
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    }
+
+    function resizeCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      initRings();
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      window.removeEventListener('resize', resizeCanvas);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 z-10" />;
+}

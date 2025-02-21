@@ -1,0 +1,15 @@
+{
+  "default": true,
+  "MD013": false,
+  "MD022": true,
+  "MD025": true,
+  "MD029": {
+    "style": "ordered"
+  },
+  "MD031": true,
+  "MD032": true,
+  "MD034": false,
+  "MD041": true,
+  "code-block-style": false,
+  "fenced-code-language": false
+}

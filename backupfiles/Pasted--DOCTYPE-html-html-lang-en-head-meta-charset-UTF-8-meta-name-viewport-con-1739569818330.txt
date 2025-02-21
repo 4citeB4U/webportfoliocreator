@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Plan Charts</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding: 2rem;
+            background-color: #f5f5f5;
+        }
+
+        .space-y-8 > * + * {
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .chart-container {
+            height: 400px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="space-y-8">
+        <!-- Financial Projections Chart -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">3-Year Financial Projections</h2>
+            </div>
+            <div class="card-content">
+                <div class="chart-container">
+                    <canvas id="financialProjectionsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense Breakdown Pie Chart -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Expense Breakdown</h2>
+            </div>
+            <div class="card-content">
+                <div class="chart-container">
+                    <canvas id="expenseBreakdownChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Enrollment Projection -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Projected Student Enrollment Growth (Year 2)</h2>
+            </div>
+            <div class="card-content">
+                <div class="chart-container">
+                    <canvas id="enrollmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Growth Bar Chart -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Annual Student Enrollment</h2>
+            </div>
+            <div class="card-content">
+                <div class="chart-container">
+                    <canvas id="studentGrowthChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const financialData = [
+            { year: 'Year 1', students: 20, programFees: 100000, grantsAndDonations: 50000, totalRevenue: 150000, expenses: 130000, surplus: 20000 },
+            { year: 'Year 2', students: 40, programFees: 200000, grantsAndDonations: 100000, totalRevenue: 300000, expenses: 250000, surplus: 50000 },
+            { year: 'Year 3', students: 60, programFees: 300000, grantsAndDonations: 150000, totalRevenue: 450000, expenses: 380000, surplus: 70000 }
+        ];
+
+        const expenseBreakdown = [
+            { name: 'Instructor Salaries', value: 18000 },
+            { name: 'Vehicle Expenses', value: 6000 },
+            { name: 'Curriculum Materials', value: 3000 },
+            { name: 'Administrative Costs', value: 3000 }
+        ];
+
+        const enrollmentData = [
+            { month: 'Jan', students: 12 },
+            { month: 'Feb', students: 15 },
+            { month: 'Mar', students: 18 },
+            { month: 'Apr', students: 20 },
+            { month: 'May', students: 25 },
+            { month: 'Jun', students: 28 },
+            { month: 'Jul', students: 32 },
+            { month: 'Aug', students: 35 },
+            { month: 'Sep', students: 38 },
+            { month: 'Oct', students: 40 },
+            { month: 'Nov', students: 42 },
+            { month: 'Dec', students: 45 }
+        ];
+
+        const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+        // Initialize charts when the page loads
+        window.onload = function() {
+            // Financial Projections Chart
+            new Chart(document.getElementById('financialProjectionsChart'), {
+                type: 'bar',
+                data: {
+                    labels: financialData.map(item => item.year),
+                    datasets: [
+                        {
+                            label: 'Total Revenue',
+                            data: financialData.map(item => item.totalRevenue),
+                            backgroundColor: '#8884d8'
+                        },
+                        {
+                            label: 'Expenses',
+                            data: financialData.map(item => item.expenses),
+                            backgroundColor: '#82ca9d'
+                        },
+                        {
+                            label: 'Surplus',
+                            data: financialData.map(item => item.surplus),
+                            backgroundColor: '#ffc658'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Expense Breakdown Pie Chart
+            new Chart(document.getElementById('expenseBreakdownChart'), {
+                type: 'pie',
+                data: {
+                    labels: expenseBreakdown.map(item => item.name),
+                    datasets: [{
+                        data: expenseBreakdown.map(item => item.value),
+                        backgroundColor: COLORS
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(0);
+                                    return `${context.label}: ${percentage}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Student Enrollment Projection Line Chart
+            new Chart(document.getElementById('enrollmentChart'), {
+                type: 'line',
+                data: {
+                    labels: enrollmentData.map(item => item.month),
+                    datasets: [{
+                        label: 'Number of Students',
+                        data: enrollmentData.map(item => item.students),
+                        borderColor: '#8884d8',
+                        tension: 0.1,
+                        fill: false,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Student Growth Bar Chart
+            new Chart(document.getElementById('studentGrowthChart'), {
+                type: 'bar',
+                data: {
+                    labels: financialData.map(item => item.year),
+                    datasets: [{
+                        label: 'Number of Students',
+                        data: financialData.map(item => item.students),
+                        backgroundColor: '#8884d8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        };
+    </script>
+</body>
+</html>

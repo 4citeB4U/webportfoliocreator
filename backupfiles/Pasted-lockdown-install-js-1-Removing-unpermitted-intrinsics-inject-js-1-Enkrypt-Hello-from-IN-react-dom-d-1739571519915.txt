@@ -1,0 +1,27 @@
+lockdown-install.js:1 Removing unpermitted intrinsics
+inject.js:1 Enkrypt: Hello from IN
+react-dom.development.js:29895 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+index.js:14  Uncaught (in promise) TypeError: engine.checkVersion is not a function
+    at loadFull (index.js:14:12)
+    at Object.init (ParticleBackground.tsx:8:11)
+    at Particles.js:46:34
+    at _Particles.componentDidMount (Particles.js:53:9)
+    at commitLayoutEffectOnFiber (react-dom.development.js:23344:30)
+    at commitLayoutMountEffects_complete (react-dom.development.js:24727:9)
+    at commitLayoutEffects_begin (react-dom.development.js:24713:7)
+    at commitLayoutEffects (react-dom.development.js:24651:3)
+    at commitRootImpl (react-dom.development.js:26862:5)
+    at commitRoot (react-dom.development.js:26721:5)
+api/user:1 
+            
+            
+            Failed to load resource: the server responded with a status of 401 (Unauthorized)
+28[Deprecation] -ms-high-contrast is in the process of being deprecated. Please see <URL> for tips on updating to the new Forced Colors Mode standard.
+content.js:2  [Deprecation] -ms-high-contrast-adjust is in the process of being deprecated. Please see https://blogs.windows.com/msedgedev/2024/04/29/deprecating-ms-high-contrast/ for tips on updating to the new Forced Colors Mode standard.
+e.insertRule @ content.js:2
+content.js:2  [Deprecation] -ms-high-contrast-adjust is in the process of being deprecated. Please see https://blogs.windows.com/msedgedev/2024/04/29/deprecating-ms-high-contrast/ for tips on updating to the new Forced Colors Mode standard.
+e.insertRule @ content.js:2
+content.js:2  [Deprecation] -ms-high-contrast-adjust is in the process of being deprecated. Please see https://blogs.windows.com/msedgedev/2024/04/29/deprecating-ms-high-contrast/ for tips on updating to the new Forced Colors Mode standard.
+e.insertRule @ content.js:2
+content.js:2  [Deprecation] -ms-high-contrast-adjust is in the process of being deprecated. Please see https://blogs.windows.com/msedgedev/2024/04/29/deprecating-ms-high-contrast/ for tips on updating to the new Forced Colors Mode standard.
+e.insertRule @ content.js:2

@@ -1,0 +1,132 @@
+import { FC, useState, useRef } from 'react';
+import { Button } from "@/components/ui/button";
+import { Loader2, Move } from "lucide-react";
+import { type DraggableItemProps } from "@/components/dnd/DraggableComponent";
+
+interface Website {
+  id: string;
+  name: string;
+  components: DraggableItemProps[];
+}
+
+interface WebsiteBuilderProps {
+  projectId?: string;
+}
+
+export const WebsiteBuilder: FC<WebsiteBuilderProps> = ({ projectId }) => {
+  const [activeWebsite, setActiveWebsite] = useState<Website | null>(null);
+  const [projectUrl, setProjectUrl] = useState<string | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
+
+  const previewRef = useRef<HTMLIFrameElement>(null);
+
+  const handleProjectDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsPreviewLoading(true);
+    setPreviewError(null);
+
+    try {
+      const rawData = e.dataTransfer.getData('text/plain');
+      console.log('Raw drag data:', rawData);
+
+      const data = JSON.parse(rawData);
+      console.log('Parsed drop data:', data);
+
+      if (!data) {
+        throw new Error('No drag data received');
+      }
+
+      // Set active website
+      const name = data.name || data.project;
+      const id = data.id || (data.url ? data.url.split('/').pop() : null);
+
+      if (!id || !name) {
+        throw new Error('Invalid project data: missing id or name');
+      }
+
+      console.log('Setting up preview for:', { id, name });
+
+      setActiveWebsite({
+        id,
+        name,
+        components: []
+      });
+
+      // Construct preview URL
+      const previewUrl = `/projects/${id}`;
+      console.log('Setting preview URL:', previewUrl);
+      setProjectUrl(previewUrl);
+
+      // Load the preview in iframe
+      if (previewRef.current) {
+        console.log('Loading preview in iframe:', previewUrl);
+        previewRef.current.src = previewUrl;
+      }
+
+    } catch (error) {
+      console.error('Error processing drop:', error);
+      setPreviewError(`Failed to process drop: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
+  return (
+    <div className="h-full flex flex-col">
+      <div
+        className="bg-background/95 rounded-md h-full p-4 border-2 border-dashed border-primary/20 shadow-[0_0_30px_rgba(6,182,212,0.25)] backdrop-blur-md relative"
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+          console.log('Dragging over drop zone');
+        }}
+        onDrop={handleProjectDrop}
+      >
+        {!activeWebsite ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center text-primary/60">
+              <Move className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>Drag a project from the Projects menu to preview</p>
+            </div>
+          </div>
+        ) : (
+          <div className="h-full">
+            {isPreviewLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            )}
+            {previewError ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm text-destructive">
+                {previewError}
+              </div>
+            ) : (
+              <div className="relative w-full h-full">
+                <iframe
+                  ref={previewRef}
+                  className="w-full h-full rounded-md border border-primary/20"
+                  style={{ backgroundColor: 'white' }}
+                  src="about:blank"
+                  allow="fullscreen"
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                  onError={(e) => {
+                    console.error('Preview loading error:', e);
+                    setPreviewError('Failed to load preview. Please try again.');
+                    setIsPreviewLoading(false);
+                  }}
+                  onLoad={() => {
+                    console.log('Preview loaded successfully');
+                    setIsPreviewLoading(false);
+                    setPreviewError(null);
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

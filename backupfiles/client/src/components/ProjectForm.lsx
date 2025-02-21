@@ -1,0 +1,54 @@
+import React, { useState } from 'react';
+import { VoiceSelector } from './VoiceSelector';
+import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+
+interface ProjectFormProps {
+  onSubmit: (data: any) => void;
+}
+
+export const ProjectForm: React.FC<ProjectFormProps> = ({ onSubmit }) => {
+  const [enableVoice, setEnableVoice] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = {
+      // ... other project data
+      voice: enableVoice ? {
+        name: selectedVoice?.name,
+        lang: selectedVoice?.lang,
+        voiceURI: selectedVoice?.voiceURI
+      } : null
+    };
+    onSubmit(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* ... other project form fields */}
+      
+      <Card className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <Label htmlFor="voice-toggle">Enable Text-to-Speech</Label>
+          <Switch
+            id="voice-toggle"
+            checked={enableVoice}
+            onCheckedChange={setEnableVoice}
+          />
+        </div>
+
+        {enableVoice && (
+          <VoiceSelector
+            onVoiceSelect={(voice) => setSelectedVoice(voice)}
+          />
+        )}
+      </Card>
+
+      {/* ... submit button etc */}
+    </form>
+  );
+};
+
+export default ProjectForm;

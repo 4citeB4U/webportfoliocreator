@@ -1,0 +1,88 @@
+I need a website creation toolkit that allows me to build websites rapidly using a drag-and-drop interface. The toolkit should prioritize speed and ease of use, following a "scroll, grab, drop" workflow.
+
+**CORE FUNCTIONALITY:**
+
+1.  **Component Library (AI-Populated from Examples and Extensible):** The toolkit must provide a large, categorized library of pre-built components.
+    *   **Initial Categorization:** The AI should *automatically* analyze the provided code examples (Particle class, DashboardLayout, useAnimationController, UI and Navigation Components) and the Pro Driver Academy website (provide URL here) to determine appropriate component categories and populate the library with initial components based on this analysis.
+    *   **Categories Should Include (but are not limited to):**
+        *   Particle Animation Backgrounds (the majority of backgrounds)
+        *   Button Layout Frameworks (entire layouts, not just individual buttons, with specific frameworks for: Portfolio, Storefront, Independent Artist)
+        *   Data Display Sections (pre-configured layouts for displaying data)
+        *   Video Players
+        *   Audio Players
+        *   UI Layout (From Above)
+        *  Navigational Components (From Above)
+        *  Informational Components (From Above)
+        *  Input controls
+        *  Containers
+        *   **Payment Integration Components** (see point 7)
+
+2.  **Drag-and-Drop Interface:** Users should be able to visually browse components, drag them onto a canvas representing the website, and drop them into place. Components should be easily rearranged and removed.
+
+3.  **Reference Website:** Use the Pro Driver Academy website (provide URL here) as a primary style and functionality reference *for Portfolios*. The toolkit should be capable of producing websites with a similar look and feel, but with customizable components. The AI should use this in conjunction with the code examples.
+
+4.  **AI Assistance:** Integrate AI assistance in the following areas:
+    *   **QR Code Generation:** Automatically generate a unique, styled QR code for each created website, linking to its URL. The AI should offer design options for the QR code.
+    *   **Theme Design:** Provide AI-powered suggestions for color palettes, fonts, and overall visual themes.
+    *   **Component Suggestion:** Suggest optimal component placement and combinations based on the user's current design.
+    *   **Data Population:** Allow users to define data categories and have the AI automatically populate data fields within components based on those categories.
+    *   **Component Generation AI:** A dedicated AI assistant *within the toolkit* to help expand the component library. This AI should:
+        *   **Analyze Code:** Accept code input (e.g., JavaScript, React components) pasted or dragged into a designated area.
+        *   **Decompose into Components:** Identify reusable parts within the provided code and suggest how to break them down into separate components.
+        *   **Generate Variations:** Create variations of the identified components by modifying parameters like color, shape, size, animation speed, etc., while maintaining the original component's core functionality and style.
+        *   **Categorize and Name:** Suggest appropriate categories and names for the newly generated components.
+        *   **Integrate into Library:** Add the new components to the component library, making them available for drag-and-drop use.
+        *   **Code Modification:** Be able to modify existing code based on component additions and rearrangements, or generate entirely new component code.
+         * **Button Layout Frameworks:** Be able to create and add to the three defined button frameworks
+
+5.  **Centralized Administrative Dashboard (with Tiered Access):** The toolkit *itself* serves as the single, centralized administrative dashboard for *all* generated websites. This dashboard must provide:
+    *   **Website Management:** A view of all created websites, with the ability to select and edit any of them.
+    *   **Component-Based Editing:** The *same* drag-and-drop, component-based editing system used to create websites is used to modify existing websites.
+    *   **Tiered User Access Control:** Implement a system with *at least* three levels of access:
+        *   **Full Admin (You):** Complete control over all aspects of all websites.
+        *   **Managed Client:** You maintain full administrative control, but the client has limited access to view website statistics (e.g., traffic, engagement) and contact you through a built-in communication channel. They *cannot* modify the website's structure or content.
+        *   **Full Client Control:** The client is granted full administrative control over *their specific website only*. This effectively transfers ownership, allowing them to manage the website independently (including running it "locally," implying the ability to export or deploy the website).
+    *   **Override/Assistance Capability:** Even when a client has "Full Client Control," you retain the ability to *temporarily* regain administrative access for technical support or troubleshooting. This access should be revocable by you after the support is provided.
+    * **Website Selection:** Should have a list, or other selection method, that makes it easy to open any created website for modification.
+
+6.  **Rapid Deployment:** The toolkit should be optimized for speed, enabling the creation and deployment of a complete, functional website within 1-2 days.
+
+7.  **Payment Integration:**
+    *   The toolkit must provide components and configuration options for integrating with popular payment providers, such as Stripe and Square.
+    *   The integration should allow for secure processing of online payments within the generated websites.
+    *  The payment integration should be optional and primarily used for website types like storefronts. The AI should suggest appropriate placement of these components, but the component library and drag and drop functionality should be the key enabler here.
+
+**INPUT EXAMPLES (CRITICAL FOR INITIALIZATION):**
+
+*   **Code Snippets:**
+    ```javascript
+    // Particle Class (as provided previously)
+    class Particle { ... }
+
+    // ParticleSystem Object (as provided previously)
+     const ParticleSystem = { ... };
+
+    // React Component: DashboardLayout (as provided previously)
+    const DashboardLayout = () => { ... };
+
+    // React Hook: useAnimationController (as provided previously)
+    const useAnimationController = () => { ... };
+    ```
+    ```javascript
+     // UI Layout (as provided previously)
+    import React from 'react';
+    import { Layout, Code, Database, Globe, Users, Settings, Activity, Server, Box } from 'lucide-react';
+
+     const DashboardLayout = () => { ...  }; //rest of code
+    ```
+
+*   **Pro Driver Academy Website URL:** (Provide the actual URL here)
+* I may provide a list of color hexcodes, or other design prefeneces
+* The input from above for the UI and Navigation componets
+*   **Example Payment Integration (Conceptual):**
+    *   "Integrate with Stripe Checkout."
+    *   "Provide a 'Square Payment Form' component."
+
+**OUTPUT:**
+
+The output should be a fully functional web development toolkit that meets all the specified requirements. This includes the user interface, the *initial, AI-populated component library*, the AI assistance features (including the Component Generation AI), and the backend functionality for website generation and management, *including payment processing integration*. This toolkit *is* the centralized administrative dashboard. The AI should use the input examples to *bootstrap* the toolkit's functionality and component library.

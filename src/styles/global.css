@@ -1,0 +1,105 @@
+ the code base @import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Custom base styles */
+@layer base {
+  :root {
+    --primary-neon: #00ffff;
+    --secondary-neon: #ff00ff;
+    --accent-green: #00ff00;
+    --dark-bg: #000913;
+    --card-bg: rgba(0, 9, 19, 0.8);
+  }
+
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-dark-bg text-primary-neon min-h-screen overflow-x-hidden font-mono;
+  }
+}
+
+/* Custom components */
+@layer components {
+  .btn-neon {
+    @apply px-6 py-2 rounded-full bg-primary-neon/20 hover:bg-primary-neon/30 transition-all;
+    @apply text-primary-neon font-bold;
+    @apply shadow-[0_0_10px_var(--primary-neon),0_0_20px_var(--primary-neon)];
+    @apply hover:shadow-[0_0_15px_var(--primary-neon),0_0_30px_var(--primary-neon)];
+  }
+
+  .glassmorphism {
+    @apply bg-dark-bg/80 backdrop-blur-lg;
+    @apply border border-primary-neon/10 rounded-xl;
+  }
+
+  .neon-text {
+    @apply text-primary-neon;
+    text-shadow: 0 0 5px var(--primary-neon),
+                 0 0 10px var(--primary-neon),
+                 0 0 20px var(--primary-neon);
+  }
+
+  .glow-text {
+    text-shadow: 0 0 10px var(--primary-neon),
+                 0 0 20px var(--primary-neon),
+                 0 0 30px var(--primary-neon);
+  }
+
+  .glow-border {
+    box-shadow: 0 0 10px var(--primary-neon),
+                0 0 20px var(--primary-neon);
+  }
+}
+
+/* Custom animations */
+@layer utilities {
+  .animate-matrix-fall {
+    animation: matrixFall 20s linear infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  @keyframes matrixFall {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes glow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.3); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-dark-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary-neon rounded-full;
+  @apply hover:bg-secondary-neon transition-colors duration-200;
+}

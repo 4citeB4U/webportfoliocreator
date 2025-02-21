@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Creator - Developer Tools Kit</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #2196F3;
+            --secondary-blue: #1976D2;
+            --accent-green: #4CAF50;
+            --accent-yellow: #FFC107;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
+            color: var(--white);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .qr-creator {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--secondary-blue);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .qr-preview {
+            margin: 2rem 0;
+            padding: 1rem;
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .qr-settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, var(--secondary-blue), var(--primary-blue));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .qr-list {
+            margin-top: 3rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .qr-list h2 {
+            color: var(--secondary-blue);
+            margin-bottom: 1.5rem;
+        }
+
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .qr-item {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .qr-item img {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 1rem;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="qr-creator">
+            <h1>QR Code Creator</h1>
+            <form id="qr-form">
+                <div class="form-group">
+                    <label for="project-name">Project Name</label>
+                    <input type="text" id="project-name" required placeholder="Enter project name">
+                </div>
+
+                <div class="form-group">
+                    <label for="project-url">Project URL</label>
+                    <input type="url" id="project-url" required placeholder="https://example.com">
+                </div>
+
+                <div class="qr-settings">
+                    <div class="form-group">
+                        <label for="qr-size">QR Code Size</label>
+                        <select id="qr-size">
+                            <option value="220">220x220</option>
+                            <option value="300">300x300</option>
+                            <option value="400">400x400</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="error-correction">Error Correction</label>
+                        <select id="error-correction">
+                            <option value="L">Low</option>
+                            <option value="M">Medium</option>
+                            <option value="Q">Quartile</option>
+                            <option value="H" selected>High</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qr-color">QR Code Color</label>
+                        <input type="color" id="qr-color" value="#2196F3">
+                    </div>
+                </div>
+
+                <div class="qr-preview" id="qr-preview">
+                    <!-- QR code will be displayed here -->
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn">Generate QR Code</button>
+                    <button type="button" class="btn" id="download-btn">Download QR Code</button>
+                    <button type="button" class="btn" id="save-btn">Save to Project</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="qr-list">
+            <h2>Saved QR Codes</h2>
+            <div class="qr-grid" id="saved-qr-codes">
+                <!-- Saved QR codes will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const qrForm = document.getElementById('qr-form');
+        const qrPreview = document.getElementById('qr-preview');
+        const savedQrCodes = document.getElementById('saved-qr-codes');
+
+        function generateQRCode() {
+            const projectName = document.getElementById('project-name').value;
+            const projectUrl = document.getElementById('project-url').value;
+            const size = parseInt(document.getElementById('qr-size').value);
+            const errorLevel = document.getElementById('error-correction').value;
+            const color = document.getElementById('qr-color').value;
+
+            // Clear previous QR code
+            qrPreview.innerHTML = '';
+
+            // Create QR code
+            const qr = qrcode(0, errorLevel);
+            qr.addData(projectUrl);
+            qr.make();
+            
+            // Create QR code image with custom color
+            const qrImage = qr.createSvgTag(size/25, 0, color);
+            qrPreview.innerHTML = qrImage;
+
+            return { qrImage, projectName, projectUrl };
+        }
+
+        qrForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            generateQRCode();
+        });
+
+        document.getElementById('download-btn').addEventListener('click', () => {
+            const svg = qrPreview.querySelector('svg');
+            if (svg) {
+                // Convert SVG to data URL
+                const svgData = new XMLSerializer().serializeToString(svg);
+                const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `qr-${document.getElementById('project-name').value}.svg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+        });
+
+        document.getElementById('save-btn').addEventListener('click', () => {
+            const { qrImage, projectName, projectUrl } = generateQRCode();
+            
+            // Create new QR code item
+            const qrItem = document.createElement('div');
+            qrItem.className = 'qr-item';
+            qrItem.innerHTML = `
+                <h3>${projectName}</h3>
+                ${qrImage}
+                <p><a href="${projectUrl}" target="_blank">${projectUrl}</a></p>
+            `;
+            
+            // Add to saved QR codes
+            savedQrCodes.appendChild(qrItem);
+        });
+
+        // Live preview on form changes
+        const formInputs = qrForm.querySelectorAll('input, select');
+        formInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                if (document.getElementById('project-url').value) {
+                    generateQRCode();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

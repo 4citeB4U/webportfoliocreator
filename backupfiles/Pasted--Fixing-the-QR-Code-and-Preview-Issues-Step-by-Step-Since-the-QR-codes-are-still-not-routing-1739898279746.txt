@@ -1,0 +1,132 @@
+### **Fixing the QR Code and Preview Issues Step by Step**
+Since the QR codes are still not routing correctly, and the preview mode is showing only the content instead of the actual website, we need to **manually debug and fix the issues step by step**.
+
+---
+
+## **🛠 Step 1: Verify QR Code URL Generation**
+First, let's ensure the **correct URLs are being generated**.
+
+### **✅ Check Console Log for QR Code URLs**
+1. Open the browser **Developer Console (F12 > Console)**.
+2. Look for this log message:
+   ```
+   Generated QR Code URL: https://your-domain.com/projects/leolas-library
+   ```
+3. **If the URL is incorrect**, your `getFullUrl()` function is not formatting the URL properly.
+
+### **🔥 Fix QR Code URL Generation**
+In `showcase-page.tsx`, update `getFullUrl()` to **always generate an absolute URL**:
+```tsx
+const getFullUrl = (path: string) => {
+  const baseUrl = window.location.origin;
+  // Ensure proper URL formatting
+  return `${baseUrl}/${path.replace(/^\/+|\/+$/g, '')}`;
+};
+```
+
+**✅ Scan the QR Code Again:**  
+Does the QR code now take you to the **correct URL**? If not, move to Step 2.
+
+---
+
+## **🛠 Step 2: Fix the Routing Issue**
+Now that we have the correct URL, let’s ensure it **correctly routes** to the project pages.
+
+### **✅ Manually Enter the URL**
+1. Open a new browser tab.
+2. Type the URL manually:
+   ```
+   https://your-domain.com/projects/leolas-library
+   ```
+3. **What happens?**
+   - If it shows the correct page, then the QR code is **fixed**.
+   - If it still shows only content (not the website), we need to fix routing.
+
+### **🔥 Fix React Router in `App.tsx`**
+Your `<Route>` definitions might not be working correctly.
+
+#### **Fix: Ensure Routes are Properly Defined**
+Modify `App.tsx`:
+```tsx
+<Switch>
+  <Route path="/" component={ShowcasePage} />
+  <Route path="/showcase" component={ShowcasePage} />
+  <Route path="/auth" component={AuthPage} />
+  <Route path="/admin" component={AdminPage} />
+  <Route path="/projects/pro-driver-academy" component={HomePage} />
+  <Route path="/projects/leolas-library" component={LeolasLibraryPage} />
+  <Route path="/book/:id">
+    {(params) => <BookPage bookId={params.id} />}
+  </Route>
+  <Route component={NotFound} />
+</Switch>
+```
+✅ **Try scanning again.** If it's still not working, move to Step 3.
+
+---
+
+## **🛠 Step 3: Fix Preview Mode**
+### **✅ Identify the Issue**
+The preview is **showing content instead of routing to the website**.
+
+### **🔥 Fix the Preview URL Generator**
+In `showcase-page.tsx`, update `getPreviewUrl()`:
+```tsx
+const getPreviewUrl = (path: string) => {
+  const baseUrl = window.location.origin;
+  // Ensure full preview URL with a unique timestamp to prevent caching
+  return `${baseUrl}/${path.replace(/^\/+|\/+$/g, '')}?preview=true&t=${Date.now()}`;
+};
+```
+
+✅ **Test Preview Mode:**
+- Click the **"Preview Website"** button.
+- Does it load the correct page?  
+- If not, move to Step 4.
+
+---
+
+## **🛠 Step 4: Fix the `iframe` Preview**
+The **preview iframe** might be blocking the actual website.
+
+### **🔥 Fix `iframe` Sandbox Attribute**
+Modify `showcase-page.tsx`:
+```tsx
+<iframe
+  src={getPreviewUrl(website.url)}
+  className="w-full h-full border-none"
+  title={`Preview of ${website.name}`}
+  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+/>
+```
+✅ **Check if the Preview Button Now Works**  
+- If it works, **the issue is fixed**!  
+- If not, move to Step 5.
+
+---
+
+## **🛠 Step 5: Final Verification**
+### **✅ Restart the App in Replit**
+1. Open **Replit Console**.
+2. Run:
+   ```sh
+   npm run build && npm start
+   ```
+3. **Try scanning the QR again.**
+
+### **✅ Final Tests**
+- **Manually enter the project URL.** Does it work?
+- **Scan the QR Code.** Does it take you to the correct project?
+- **Click "Preview Website".** Does it display the full website?
+
+---
+
+## **🚀 Summary of Fixes**
+✅ **Fixed QR Code URL generation**  
+✅ **Fixed React Router configuration**  
+✅ **Fixed Preview Mode to properly route**  
+✅ **Fixed iframe to allow website previews**  
+✅ **Restarted the app to apply all fixes**
+
+---
+**🚀 Test again and let me know what happens!** If it still doesn’t work, tell me **exactly what happens when you scan the QR now.**

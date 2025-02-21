@@ -1,0 +1,874 @@
+client/src/pages/showcase-page.lsx:
+import React from "react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight } from "lucide-react";
+import { Navbar } from "@/components/navigation/Navbar";
+
+const projects = [
+  {
+    id: "pro-driver-academy",
+    name: "Pro Driver Academy",
+    description: "Professional CDL training academy website with comprehensive course information and student portal.",
+    imageUrl: "/covers/pro-driver-academy.png",
+    tags: ["React", "Tailwind CSS", "shadcn/ui", "Server Actions"],
+    url: "/projects/pro-driver-academy",
+  },
+  {
+    id: "leolas-library",
+    name: "Leola's Digital Library",
+    description: "A digital library website for showcasing and selling books online.",
+    imageUrl: "/covers/leolas-library.png",
+    tags: ["Next.js", "Tailwind CSS", "shadcn/ui", "Stripe"],
+    url: "/projects/leolas-library",
+  },
+  {
+    id: "rwd-dashboard",
+    name: "WPD Dashboard",
+    description: "A responsive web developer dashboard for managing projects and resources.",
+    imageUrl: "/covers/rwd-dashboard.png",
+    tags: ["React", "Tailwind CSS", "shadcn/ui", "Drizzle ORM"],
+    url: "/admin",
+  },
+];
+
+export default function ShowcasePage() {
+  return (
+    <>
+      <Navbar />
+      <section className="py-12">
+        <div className="container">
+          <div className="space-y-8">
+            <div className="space-y-2 text-center">
+              <h2 className="text-3xl font-bold">Explore Our Projects</h2>
+              <p className="text-muted-foreground">
+                Browse our featured projects and discover the power of Rapid Web Development.
+              </p>
+            </div>
+            <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+              {projects.map((project) => (
+                <Card key={project.id}>
+                  <CardHeader>
+                    <CardTitle>{project.name}</CardTitle>
+                    <CardDescription>{project.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <img
+                      src={project.imageUrl}
+                      alt={project.name}
+                      className="aspect-video w-full rounded-md object-cover"
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      {project.tags.map((tag) => (
+                        <Badge key={tag}>{tag}</Badge>
+                      ))}
+                    </div>
+                    <Link href={project.url}>
+                      <Button className="w-full">
+                        View Project <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+client/src/components/portfolio/TeamStructure.lsx:
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useSpeech } from "@/hooks/use-speech";
+import { Volume2, VolumeX } from "lucide-react";
+import { BarChartComponent, PieChartComponent } from "../charts/DashboardCharts";
+
+const overviewScript = `Pro Driver Academy maintains a lean, efficient organizational structure that emphasizes accountability, professionalism, and mission focus.`;
+
+const staffingData = {
+  title: "Staff Growth Projections",
+  data: [
+    { name: "2024", value: 5 },
+    { name: "2025", value: 7 },
+    { name: "2026", value: 10 }
+  ],
+  explanation: "Our staffing plan shows growth from 5 team members in 2024 to 10 by 2026."
+};
+
+const salaryData = {
+  title: "Salary Budget Distribution",
+  data: [
+    { name: "Executive Director", value: 75000 },
+    { name: "Lead Instructor", value: 65000 },
+    { name: "Operations Manager", value: 55000 },
+    { name: "Marketing Coordinator", value: 45000 },
+    { name: "Administrative Staff", value: 35000 }
+  ],
+  explanation: "Our salary budget is allocated based on role responsibilities and industry standards."
+};
+
+export default function TeamStructure() {
+  const { speak, stop, isSpeaking } = useSpeech();
+
+  return (
+    <div className="space-y-8 py-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-4xl font-bold">Team Structure</h1>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => isSpeaking ? stop() : speak(overviewScript)}
+        >
+          {isSpeaking ? (
+            <VolumeX className="h-4 w-4" />
+          ) : (
+            <Volume2 className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Executive Director</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Key Responsibilities:</h3>
+                <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+                  <li>Strategic leadership</li>
+                  <li>Financial management</li>
+                  <li>Partnership development</li>
+                  <li>Grant writing/management</li>
+                  <li>Community relations</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Director of Training</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Key Responsibilities:</h3>
+                <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+                  <li>Curriculum development</li>
+                  <li>Instructor supervision</li>
+                  <li>Training quality assurance</li>
+                  <li>Safety program management</li>
+                  <li>Student assessment</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Operations Manager</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Key Responsibilities:</h3>
+                <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+                  <li>Daily operations management</li>
+                  <li>Student services</li>
+                  <li>Facility management</li>
+                  <li>Schedule coordination</li>
+                  <li>Administrative oversight</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <BarChartComponent chartData={staffingData} />
+        <PieChartComponent chartData={salaryData} />
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Professional Development</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Programs:</h3>
+                <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+                  <li>Industry certifications</li>
+                  <li>Professional memberships</li>
+                  <li>Conference attendance</li>
+                  <li>Skill development workshops</li>
+                  <li>Leadership training</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Advisory Committees</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Structure:</h3>
+                <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+                  <li>Industry Advisory Committee
+                    <ul className="list-disc pl-4 mt-2">
+                      <li>Local trucking companies</li>
+                      <li>Logistics providers</li>
+                    </ul>
+                  </li>
+                  <li>Community Advisory Committee
+                    <ul className="list-disc pl-4 mt-2">
+                      <li>Community leaders</li>
+                      <li>Partner organizations</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+client/src/components/portfolio/ExecutiveSummary.lsx:
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useSpeech } from "@/hooks/use-speech";
+import { Volume2, VolumeX } from "lucide-react";
+
+const script = `Pro Driver Academy (PDA) is a Wisconsin-based nonprofit organization dedicated to addressing the critical shortage of qualified Class A Commercial Driver's License (CDL) holders in Southeastern Wisconsin and the Milwaukee metropolitan area. Our comprehensive training program exceeds all WisDOT and FMCSA requirements while maintaining accessibility for underserved populations.`;
+
+export default function ExecutiveSummary() {
+  const { speak, stop, isSpeaking } = useSpeech();
+
+  return (
+    <div className="space-y-8 py-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-4xl font-bold">Executive Summary</h1>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => isSpeaking ? stop() : speak(script)}
+        >
+          {isSpeaking ? (
+            <VolumeX className="h-4 w-4" />
+          ) : (
+            <Volume2 className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Mission</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              To transform aspiring drivers into highly skilled, safety-conscious professionals while providing economic opportunities for underserved populations.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Vision</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              To be Wisconsin's premier nonprofit training provider for the logistics and mobility sector, recognized for excellence in CDL training, safety, regulatory compliance, and community impact.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Values</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+              <li>Safety: Uncompromising commitment to safety standards</li>
+              <li>Professionalism: Developing highly skilled drivers</li>
+              <li>Accessibility: Making training attainable for diverse populations</li>
+              <li>Integrity: Operating with transparency and honesty</li>
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Re-use the existing ExecutiveDashboard component for charts */}
+    </div>
+  );
+}
+client/src/components/portfolio/MarketingStrategy.lsx:
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useSpeech } from "@/hooks/use-speech";
+import { Volume2, VolumeX } from "lucide-react";
+import { BarChartComponent, PieChartComponent } from "../charts/DashboardCharts";
+
+const overviewScript = `Pro Driver Academy's marketing strategy focuses on reaching and serving underserved populations in Southeastern Wisconsin while building strong partnerships with community organizations and industry stakeholders.`;
+
+const budgetData = {
+  title: "Marketing Budget Allocation",
+  data: [
+    { name: "Digital Marketing", value: 35 },
+    { name: "Community Outreach", value: 30 },
+    { name: "Industry Partnerships", value: 20 },
+    { name: "Print Materials", value: 15 }
+  ],
+  explanation: "Our marketing budget is strategically allocated across digital marketing (35%), community outreach (30%), industry partnerships (20%), and print materials (15%)."
+};
+
+const audienceData = {
+  title: "Target Audience Distribution",
+  data: [
+    { name: "Career Changers", value: 35 },
+    { name: "Veterans", value: 25 },
+    { name: "Recent Graduates", value: 20 },
+    { name: "Unemployed", value: 20 }
+  ],
+  explanation: "Our target audience includes career changers (35%), veterans (25%), recent graduates (20%), and unemployed individuals (20%)."
+};
+
+export default function MarketingStrategy() {
+  const { speak, stop, isSpeaking } = useSpeech();
+
+  return (
+    <div className="space-y-8 py-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-4xl font-bold">Marketing Strategy</h1>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => isSpeaking ? stop() : speak(overviewScript)}
+        >
+          {isSpeaking ? (
+            <VolumeX className="h-4 w-4" />
+          ) : (
+            <Volume2 className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <PieChartComponent chartData={budgetData} />
+        <PieChartComponent chartData={audienceData} />
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Digital Marketing Channels</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Key Platforms:</h3>
+                <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+                  <li>Professional website with online application</li>
+                  <li>Social media presence (Facebook, LinkedIn)</li>
+                  <li>Email marketing campaigns</li>
+                  <li>Search engine optimization</li>
+                  <li>Content marketing and blog</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Community Partnerships</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Key Partners:</h3>
+                <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+                  <li>Wisconsin Community Services (WCS)</li>
+                  <li>Milwaukee Area Workforce Investment Board</li>
+                  <li>UMOS</li>
+                  <li>Local churches and community centers</li>
+                  <li>Wisconsin Department of Corrections</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Implementation Timeline</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Phases:</h3>
+                <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+                  <li>Phase 1: Foundation (Months 1-3)
+                    <ul className="list-disc pl-4 mt-2">
+                      <li>Website development</li>
+                      <li>Social media setup</li>
+                      <li>Initial partnerships</li>
+                    </ul>
+                  </li>
+                  <li>Phase 2: Launch (Months 4-6)</li>
+                  <li>Phase 3: Growth (Months 7-9)</li>
+                  <li>Phase 4: Optimization (Months 10-12)</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Success Metrics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="text-2xl font-bold text-primary">5K+</p>
+                  <p className="text-sm text-muted-foreground">Monthly Website Visitors</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-2xl font-bold text-primary">25%</p>
+                  <p className="text-sm text-muted-foreground">Lead Conversion Rate</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-2xl font-bold text-primary">10+</p>
+                  <p className="text-sm text-muted-foreground">Active Partnerships</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-2xl font-bold text-primary">85%</p>
+                  <p className="text-sm text-muted-foreground">Student Satisfaction</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+client/src/components/navigation/Navbar.lsx:
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Settings, LogOut } from "lucide-react";
+
+export function Navbar() {
+  return (
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center px-4 max-w-7xl mx-auto">
+        <div className="flex flex-1 items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link href="/" className="font-bold text-xl text-primary">
+              Rapid Web Developer
+            </Link>
+            <div className="flex items-center space-x-2">
+              <Link href="/projects/pro-driver-academy">
+                <Button variant="ghost" size="sm">
+                  Pro Driver Academy
+                </Button>
+              </Link>
+              <Link href="/projects/leolas-library">
+                <Button variant="ghost" size="sm">
+                  Leola's Library
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Link href="/admin">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Admin Dashboard
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 text-destructive"
+              >
+                <LogOut className="h-4 w-4" />
+                Return to RWD
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+}
+client/src/components/navigation/PDANavbar.lsx:
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
+
+export function PDANavbar() {
+  return (
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center px-4 max-w-7xl mx-auto">
+        <div className="flex flex-1 items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link href="/" className="font-bold text-xl text-primary">
+              Pro Driver Academy
+            </Link>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <Link href="/">
+              <Button variant="ghost" size="sm">
+                Home
+              </Button>
+            </Link>
+            <Link href="/admin">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Admin Portal
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+}
+client/src/components/portfolio/BusinessPlan.lsx:
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useSpeech } from "@/hooks/use-speech";
+import { Volume2, VolumeX } from "lucide-react";
+import { BarChartComponent, LineChartComponent, PieChartComponent } from "../charts/DashboardCharts";
+
+const overviewScript = `Pro Driver Academy's business plan focuses on providing comprehensive CDL training while maintaining financial sustainability through diverse revenue streams and strategic partnerships.`;
+
+const financialData = {
+  title: "Financial Projections",
+  data: [
+    { name: "Year 1", value: 150000 },
+    { name: "Year 2", value: 300000 },
+    { name: "Year 3", value: 450000 }
+  ],
+  explanation: "Our financial projections show steady growth from $150,000 in year one to $450,000 by year three."
+};
+
+const studentData = {
+  title: "Student Enrollment",
+  data: [
+    { name: "Q1 2024", value: 5 },
+    { name: "Q2 2024", value: 10 },
+    { name: "Q3 2024", value: 15 },
+    { name: "Q4 2024", value: 20 }
+  ],
+  explanation: "Student enrollment is projected to grow from 5 students in Q1 to 20 students by Q4 2024."
+};
+
+const revenueData = {
+  title: "Revenue Sources",
+  data: [
+    { name: "Program Fees", value: 50 },
+    { name: "Grants", value: 25 },
+    { name: "Corporate Partnerships", value: 15 },
+    { name: "Donations", value: 10 }
+  ],
+  explanation: "Revenue is diversified across program fees (50%), grants (25%), corporate partnerships (15%), and donations (10%)."
+};
+
+export default function BusinessPlan() {
+  const { speak, stop, isSpeaking } = useSpeech();
+
+  return (
+    <div className="space-y-8 py-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-4xl font-bold">Business Plan</h1>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => isSpeaking ? stop() : speak(overviewScript)}
+        >
+          {isSpeaking ? (
+            <VolumeX className="h-4 w-4" />
+          ) : (
+            <Volume2 className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-muted-foreground">
+                Pro Driver Academy is a nonprofit organization dedicated to providing comprehensive CDL training while addressing the critical driver shortage in Wisconsin.
+              </p>
+              <div className="space-y-2">
+                <h3 className="font-semibold">Key Components:</h3>
+                <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+                  <li>12-week comprehensive training program</li>
+                  <li>Focus on safety and compliance</li>
+                  <li>Job placement assistance</li>
+                  <li>Industry partnerships</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Program Structure</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Training Phases:</h3>
+                <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
+                  <li>Phase 1: Foundational Skills (1 week)</li>
+                  <li>Phase 2: CDL Permit Preparation (2 weeks)</li>
+                  <li>Phase 3: Behind-the-Wheel Training (6 weeks)</li>
+                  <li>Phase 4: Advanced Skills (3 weeks)</li>
+                  <li>Phase 5: Job Placement (Ongoing)</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <LineChartComponent chartData={financialData} />
+        <LineChartComponent chartData={studentData} />
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <PieChartComponent chartData={revenueData} />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Success Metrics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="text-2xl font-bold text-primary">85%</p>
+                  <p className="text-sm text-muted-foreground">Job Placement Rate</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-2xl font-bold text-primary">$65K</p>
+                  <p className="text-sm text-muted-foreground">Average Starting Salary</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-2xl font-bold text-primary">60+</p>
+                  <p className="text-sm text-muted-foreground">Students by Year 3</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-2xl font-bold text-primary">100%</p>
+                  <p className="text-sm text-muted-foreground">DOT Compliance</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+client/src/App.lsx:
+import React from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Switch, Route } from "wouter";
+import { queryClient } from "./lib/queryClient";
+import { Toaster } from "./components/ui/toaster";
+import NotFound from "./pages/not-found";
+import ShowcasePage from "./pages/showcase-page";
+import HomePage from "./pages/home-page";
+import LeolasLibraryPage from "./pages/leolas-library-page";
+import BookPage from "./pages/book-page";
+import { RWDParticles } from "./components/particles/RWDParticles";
+import AdminPage from "./pages/admin-page";
+import AuthPage from "./pages/auth-page";
+
+function Router() {
+  // Handle preview mode
+  const isPreview = window.location.search.includes('preview=true');
+  const pathPrefix = isPreview ? '' : '/projects';
+
+  return (
+    <Switch>
+      {/* Main routes */}
+      <Route path="/" component={ShowcasePage} />
+      <Route path="/showcase" component={ShowcasePage} />
+      <Route path="/auth" component={AuthPage} />
+      <Route path="/admin" component={AdminPage} />
+
+      {/* Pro Driver Academy routes */}
+      <Route path={`${pathPrefix}/pro-driver-academy`} component={HomePage} />
+
+      {/* Leola's Library routes */}
+      <Route path={`${pathPrefix}/leolas-library`} component={LeolasLibraryPage} />
+      <Route path="/books/:bookId">
+        {(params) => <BookPage bookId={params.bookId} />}
+      </Route>
+
+      {/* 404 fallback */}
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <div className="relative min-h-screen">
+        <div className="fixed inset-0 w-full h-full overflow-hidden bg-gradient-to-b from-gray-900 via-blue-900 to-gray-900">
+          <RWDParticles className="absolute inset-0" />
+        </div>
+        <div className="relative z-10">
+          <Router />
+          <Toaster />
+        </div>
+      </div>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
+PDA_Executive_Summary_2024.md:
+# Pro Driver Academy: Executive Summary
+
+**Date:** February 12, 2025
+
+## Mission
+To transform aspiring drivers into highly skilled, safety-conscious, and fully endorsed Class A CDL professionals, meeting the critical needs of the transportation industry in Southeastern Wisconsin and contributing to safer roads.
+
+## Business Overview
+Pro Driver Academy (PDA) is a Wisconsin-based nonprofit organization dedicated to addressing the critical shortage of qualified Class A Commercial Driver's License (CDL) holders in Southeastern Wisconsin and the Milwaukee metropolitan area. Our comprehensive training program exceeds all WisDOT and FMCSA requirements while maintaining accessibility for underserved populations.
+
+## Key Highlights
+
+### Critical Need
+- Addresses documented shortage of CDL drivers in Wisconsin
+- Focuses on Southeastern Wisconsin/Milwaukee area needs
+- Supports local businesses and supply chains
+
+### Social Impact
+- Creates pathways to well-paying careers (avg. starting salary: $65,000)
+- Promotes road safety through rigorous training
+- Provides opportunities for underserved populations
+
+### Financial Sustainability
+- Program fees (sliding scale based on income)
+- Government grants
+- Corporate partnerships
+- Philanthropic support
+
+### Strong Partnerships
+- Wisconsin Community Services (WCS)
+- Milwaukee Area Workforce Investment Board
+- UMOS (United Migrant Opportunity Services)
+- Local trucking companies
+- Wisconsin Department of Corrections
+
+## Financial Projections (3-Year Summary)
+
+| Year | Students | Revenue | Expenses | Surplus |
+|------|----------|----------|-----------|----------|
+| 1 | 20 | $150,000 | $130,000 | $20,000 |
+| 2 | 40 | $300,000 | $250,000 | $50,000 |
+| 3 | 60 | $450,000 | $380,000 | $70,000 |
+
+## Initial Funding Request
+Seeking $30,000 in grant funding from the Wisconsin DWD Commercial Driver Training Grant Program to support training costs for our first cohort of students.
+
+## Program Structure
+1. Foundational Driver Skills (1 week)
+2. CDL Learner's Permit Preparation (2 weeks)
+3. Behind-the-Wheel Training (6 weeks)
+4. Advanced Skills and Endorsements (3 weeks)
+5. Job Placement Assistance (Ongoing)
+
+## Compliance and Safety
+- Listed on federal Training Provider Registry (TPR)
+- Exceeds WisDOT and FMCSA regulations
+- Comprehensive safety protocols
+- Regular compliance audits
+
+## Contact Information
+[Your Name]
+Executive Director
+Pro Driver Academy
+[Address]
+[Phone]
+[Email]
+[Website]
+
+---
+*This executive summary is part of a comprehensive portfolio including detailed business plan, financial projections, marketing strategy, team structure, and pitch deck.*
+PDA_Financial_Projections_2024.md:
+# Pro Driver Academy: Financial Projections 2024-2027
+
+**Date:** February 12, 2025
+
+## Excel Workbook Structure
+
+This document outlines the contents and structure for a comprehensive financial projections workbook. The actual Excel file should contain the following sheets:
+
+### Sheet 1: Executive Summary Dashboard
+
+**Key Metrics Overview**
+```
+Three-Year Summary
+------------------
+                    Year 1      Year 2      Year 3
+Students             20          40          60
+Revenue         $150,000    $300,000    $450,000
+Expenses        $130,000    $250,000    $380,000
+Surplus          $20,000     $50,000     $70,000
+```
+
+**Charts to Include:**
+1. Bar chart showing Revenue, Expenses, and Surplus by year
+2. Line graph showing student enrollment growth
+3. Pie chart showing expense breakdown
+4. Bar chart showing revenue sources
+
+### Sheet 2: Detailed Income Statement (Year 1)
+
+**Monthly Revenue Breakdown**
+```
+Revenue Sources    Q1       Q2       Q3       Q4      Total
+Program Fees    $25,000  $25,000

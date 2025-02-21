@@ -1,0 +1,74 @@
+Web Buddy
+Two plus two.
+
+Four.
+
+Give me the square root of 38 plus the math that it takes to get from Milwaukee to Chicago in three hours.
+
+The square root of 38 is approximately 6.16.
+
+To cover the distance between Milwaukee and Chicago (about 92 miles) in three hours, you'd need to maintain an average speed. Here's the math:
+
+Average speed = Total distance / Total time = 92 miles / 3 hours ≈ 30.67 miles per hour.
+
+OK, quick question. When it comes to Cody, especially when dealing with website creation and. react components. I'm having issue with putting my. doing a copy paste drop more so of a grab and drop so that I can pull up a preview screen but I'm having an issue putting that in. How would I go by that?
+
+To implement a drag-and-drop feature in a React application to display a preview screen, follow these steps:
+
+1. **Set Up the State:** Create state variables to manage the file being dragged and the preview URL.
+
+   ```jsx
+   const [file, setFile] = useState(null);
+   const [preview, setPreview] = useState(null);
+   ```
+
+2. **Handle Drag-and-Drop Events:** Implement event handlers for drag-and-drop functionality.
+
+   ```jsx
+   const onDrop = (event) => {
+     event.preventDefault();
+     const droppedFile = event.dataTransfer.files[0];
+     setFile(droppedFile);
+
+     if (droppedFile) {
+       const previewUrl = URL.createObjectURL(droppedFile);
+       setPreview(previewUrl);
+     }
+   };
+
+   const onDragOver = (event) => {
+     event.preventDefault();
+   };
+   ```
+
+3. **Create the Drag-and-Drop Area:** Set up a simple component with a div to handle file drops.
+
+   ```jsx
+   return (
+     <div
+       onDrop={onDrop}
+       onDragOver={onDragOver}
+       style={{ width: '300px', height: '200px', border: '2px dashed #000' }}
+     >
+       {preview ? (
+         <img src={preview} alt="Preview" style={{ width: '100%', height: '100%' }} />
+       ) : (
+         <p>Drag and drop a file here</p>
+       )}
+     </div>
+   );
+   ```
+
+4. **Clean Up Resources:** Optionally, use an effect to clean up the object URL when the component unmounts or the file changes.
+
+   ```jsx
+   useEffect(() => {
+     return () => {
+       if (preview) {
+         URL.revokeObjectURL(preview);
+       }
+     };
+   }, [preview]);
+   ```
+
+This setup allows you to drag and drop files into the specified area, automatically updating and displaying a preview. Make sure your application supports the file types you intend to preview.

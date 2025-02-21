@@ -1,0 +1,103 @@
+### **Let's Fix This QR Code & Preview Issue Once and for All**
+Your issue seems to be a combination of **incorrect URL routing**, **QR code generation errors**, and **preview display issues**. I’ll walk through a **step-by-step debugging process** to pinpoint and solve this issue permanently.
+
+---
+
+## **🔍 Step 1: Verify the Correct Project URLs**
+Before we do anything, confirm the **exact URLs** where both projects should be accessible:
+
+1. **Leola’s Digital Library**
+   - Expected URL: `https://your-domain.com/projects/leolas-library`
+   - Current URL when scanning QR: **Does it match this exactly?**
+   - If different, what URL does it redirect to?
+
+2. **Pro Driver Academy**
+   - Expected URL: `https://your-domain.com/projects/pro-driver-academy`
+   - Current URL when scanning QR: **Does it match this exactly?**
+   - If different, what URL does it redirect to?
+
+⚡ **Test:** Try **manually** entering the expected URLs in your browser. Do they work as expected? If not, we need to check the routing.
+
+---
+
+## **🔍 Step 2: Check Routing & Deployment on Replit**
+The previews and QR codes may not work because your deployment isn't correctly handling routes.
+
+### **✅ Check if the App is Deployed & Running**
+1. Open **Replit logs** (console).
+2. Run:
+   ```sh
+   npm run build && npm start
+   ```
+   If any errors appear, **screenshot or paste them here**.
+
+3. Check your **Replit deployment settings**:
+   - Is it deployed as a **static site** or a **Node.js app**?
+   - Are the routes in **Replit settings** correctly mapping to `/projects/leolas-library` and `/projects/pro-driver-academy`?
+
+---
+
+## **🔍 Step 3: Fix the QR Code Generation**
+It looks like the QR codes may be **incorrectly linking to the home page** instead of specific project pages.
+
+### **✅ Check the QR Code Generator Code**
+1. Open **`ShowcasePage.tsx` (or wherever the QR codes are generated)**.
+2. Look for the function generating the URLs, it should look something like:
+   ```tsx
+   const projectUrl = `${window.location.origin}/projects/${projectSlug}`;
+   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(projectUrl)}`;
+   ```
+3. **Fix any issues:** If `window.location.origin` is incorrect, manually define the full URL:
+   ```tsx
+   const projectUrl = `https://your-domain.com/projects/${projectSlug}`;
+   ```
+4. If the QR codes are still pointing to `/` (home page), ensure `projectSlug` is correctly set for each project.
+
+---
+
+## **🔍 Step 4: Fix the Website Previews**
+It sounds like the **previews are not loading the full website**, and instead just showing text content.
+
+### **✅ Check the `iframe` in `ShowcasePage.tsx`**
+1. Open `ShowcasePage.tsx` and look for the `<iframe>` preview section.
+2. It should use **`src` with the correct URL**, e.g.:
+   ```tsx
+   <iframe src={`https://your-domain.com/projects/${projectSlug}`} width="100%" height="500px"></iframe>
+   ```
+3. **Common Issues:**
+   - If `src` is missing, the preview won’t load.
+   - If **CORS errors** appear, the domain may need to allow embedding (`X-Frame-Options` should not be `deny`).
+
+---
+
+## **🔍 Step 5: Verify Web Speech API is Working**
+Now, let’s fix **the text-to-speech issue**.
+
+### **✅ Check Console Errors for Web Speech API**
+1. Open **Developer Tools (`F12`) > Console**.
+2. Look for any **red errors** related to `speechSynthesis` or `Web Speech API`.
+3. If there are errors like **“speech synthesis not supported”**, the browser might be blocking it.
+
+### **✅ Fix Web Speech API in `VoiceSelector.tsx`**
+Modify the function handling speech:
+```tsx
+if ('speechSynthesis' in window) {
+   const utterance = new SpeechSynthesisUtterance("Hello, welcome to Leola’s Digital Library!");
+   speechSynthesis.speak(utterance);
+} else {
+   console.error("Web Speech API is not supported in this browser.");
+}
+```
+- **If blocked** by **autoplay policies**, ensure the speech is triggered by **user interaction** (e.g., clicking a button).
+
+---
+
+## **🚀 Next Steps**
+1. **Manually visit the expected URLs** and confirm they are working.
+2. **Check the console logs on Replit** for errors.
+3. **Inspect `ShowcasePage.tsx`** for incorrect `iframe` and QR code generation.
+4. **Fix Web Speech API** errors by debugging `speechSynthesis`.
+
+---
+
+Once you’ve done these checks, let me know what results you’re seeing! If you can send **error logs or updated QR code links**, I can diagnose further. 🚀

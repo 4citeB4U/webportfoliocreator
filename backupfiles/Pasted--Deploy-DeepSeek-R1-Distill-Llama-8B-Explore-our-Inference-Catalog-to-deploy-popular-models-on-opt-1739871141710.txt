@@ -1,0 +1,96 @@
+ Deploy DeepSeek-R1-Distill-Llama-8B
+ Explore our Inference Catalog to deploy popular models on optimized configuration.
+
+Endpoint Name Input a name for your new endpoint
+deepseek-r1-distill-llama-8b-nem
+More options
+
+Hardware Configuration
+Contact us if you'd like to request a custom solution or instance type.
+
+
+Amazon Web Services
+
+Microsoft Azure
+
+Google Cloud Platform
+
+N. Virginia us-east-1
+
+N. Virginia [us-east-1]
+Nvidia T4
+1 GPU · 16 GB
+3 vCPUs · 15 GB
+$ 0.5/h
+Nvidia L4
+1 GPU · 24 GB
+7 vCPUs · 30 GB
+$ 0.8/h
+Nvidia A10G
+1 GPU · 24 GB
+6 vCPUs · 30 GB
+$ 1/h
+Nvidia L40S
+1 GPU · 48 GB
+7 vCPUs · 30 GB
+$ 1.8/h
+Nvidia T4
+4 GPUs · 64 GB
+46 vCPUs · 192 GB
+$ 3/h
+Nvidia L4
+4 GPUs · 96 GB
+47 vCPUs · 185 GB
+$ 3.8/h
+Nvidia A100
+1 GPU · 80 GB
+11 vCPUs · 145 GB
+$ 4/h
+Nvidia A10G
+4 GPUs · 96 GB
+46 vCPUs · 186 GB
+$ 5/h
+Nvidia A100
+2 GPUs · 160 GB
+22 vCPUs · 290 GB
+$ 8/h
+Nvidia L40S
+4 GPUs · 192 GB
+47 vCPUs · 380 GB
+$ 8.3/h
+Nvidia A100
+4 GPUs · 320 GB
+44 vCPUs · 580 GB
+$ 16/h
+Nvidia L40S
+8 GPUs · 384 GB
+190 vCPUs · 1532 GB
+$ 23.5/h
+Nvidia A100
+8 GPUs · 640 GB
+88 vCPUs · 1160 GB
+$ 32/h
+
+Autoscaling
+0 to 1 Replica / Scale-to-zero after 15 min
+Endpoints scaled to 0 replicas are not billed. They may take some time to scale back up once they start receiving requests again.
+Automatically scale the number of replicas within Min and Max based on compute usage. Min is always 0 if Scale-To-Zero is active.
+
+Security Level
+Protected
+Public
+Private
+A protected Endpoint is available from the Internet, secured with TLS/SSL and requires a valid Hugging Face Token for Authentication.
+
+
+Container Configuration
+Text Generation Inference
+TGI uses custom kernels to speed up inference for some models. You can try disabling them if you encounter issues.
+Quantization can reduce the model size and improve latency, with little degradation in model accuracy.
+Increasing this value can impact the amount of RAM required. Some models can only handle a finite range of sequences.
+The larger this value, the more memory each request will consume and the less effective batching can be.
+Number of prefill tokens used during continuous batching. It can be useful to adjust this number since the prefill operation is memory-intensive and compute-bound.
+Number of tokens that can be passed before forcing waiting queries to be put on the batch. A value of 1000 can fit 10 queries of 100 tokens or a single query of 1000 tokens.
+
+Environment Variables
+No env variables defined

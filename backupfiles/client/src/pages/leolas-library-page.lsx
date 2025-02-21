@@ -1,0 +1,200 @@
+import { Link } from "wouter";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Book, Volume2, Mic } from "lucide-react";
+import { useState, useEffect } from "react";
+import LeolasBackground from "@/components/LeolasBackground";
+import { BookCover } from "@/components/BookCover";
+
+export default function LeolasLibraryPage() {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesis | null>(null);
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    // Initialize speech synthesis
+    if (window.speechSynthesis) {
+      setSpeechSynthesis(window.speechSynthesis);
+    }
+
+    // Initialize speech recognition
+    if (window.SpeechRecognition || (window as any).webkitSpeechRecognition) {
+      const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+      setRecognition(new SpeechRecognition());
+    }
+  }, []);
+
+  const speak = (text: string) => {
+    if (speechSynthesis) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+    }
+  };
+
+  const startListening = () => {
+    if (recognition) {
+      recognition.start();
+      setIsListening(true);
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log('Recognized:', transcript);
+      };
+      recognition.onend = () => setIsListening(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="fixed inset-0 w-full h-full overflow-hidden -z-10">
+        <LeolasBackground />
+      </div>
+
+      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative z-10">
+        <div className="flex h-14 items-center px-4 max-w-7xl mx-auto">
+          <div className="flex flex-1 items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="font-bold text-xl text-primary flex items-center gap-2">
+                <Book className="h-6 w-6" />
+                Leola's Digital Library
+              </Link>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => speak("Welcome to Leola's Digital Library")}
+                disabled={isSpeaking}
+                className={isSpeaking ? "animate-pulse" : ""}
+              >
+                <Volume2 className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={startListening}
+                disabled={isListening}
+                className={isListening ? "animate-pulse" : ""}
+              >
+                <Mic className="h-5 w-5" />
+              </Button>
+              <Link href="/showcase">
+                <Button variant="ghost" size="sm">
+                  Return to Showcase
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main className="container mx-auto px-4 py-8 relative z-10">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl font-bold text-primary [text-shadow:_0_0_10px_rgba(6,182,212,0.5)]">
+              Welcome to Leola's Digital Library
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              A heartwarming collection of stories that touch the soul
+            </p>
+          </div>
+
+          <Card className="relative overflow-hidden p-6 shadow-lg hover:shadow-xl transition-shadow backdrop-blur-sm bg-background/80">
+            <div className="grid md:grid-cols-2 gap-6 items-center">
+              <div className="relative">
+                <BookCover bookId="needle-and-yarn" className="w-full" />
+              </div>
+              <div className="space-y-4">
+                <h2 className="text-2xl font-semibold">
+                  Featured Story: Needle & Yarn - A Love Stitched in Time
+                </h2>
+                <p className="text-muted-foreground">
+                  Join us on a journey through Leola's latest heartwarming tale about love, crafting, and the threads that bind us together.
+                  A story of passion, dedication, and the magic that happens when creativity meets heart.
+                </p>
+                <div className="flex gap-4">
+                  <Link href="/books/needle-and-yarn">
+                    <Button className="bg-primary hover:bg-primary/90">
+                      <Book className="mr-2 h-4 w-4" />
+                      Read Now
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="outline"
+                    onClick={() => speak("Needle and Yarn - A Love Stitched in Time. A heartwarming tale about love, crafting, and the threads that bind us together.")}
+                    disabled={isSpeaking}
+                  >
+                    <Volume2 className="mr-2 h-4 w-4" />
+                    Listen to Preview
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Link href="/books/needle-and-yarn" className="block">
+              <Card className="p-4 hover:shadow-xl transition-all duration-300 backdrop-blur-sm bg-background/80">
+                <div className="relative">
+                  <BookCover bookId="needle-and-yarn" className="mb-4" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Needle & Yarn: A Love Stitched in Time</h3>
+                <p className="text-sm text-muted-foreground">
+                  A tale of love, crafting, and finding meaning in the threads that connect us all.
+                </p>
+              </Card>
+            </Link>
+
+            <Link href="/books/crochet-mastery" className="block">
+              <Card className="p-4 hover:shadow-xl transition-all duration-300 backdrop-blur-sm bg-background/80">
+                <div className="relative">
+                  <BookCover bookId="crochet-mastery" className="mb-4" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Crochet Mastery Guide</h3>
+                <p className="text-sm text-muted-foreground">
+                  A comprehensive guide to mastering the art of crochet, with step-by-step instructions.
+                </p>
+              </Card>
+            </Link>
+
+            <Card className="p-4 hover:shadow-xl transition-all duration-300 backdrop-blur-sm bg-background/80">
+              <div className="aspect-[3/4] relative rounded-md overflow-hidden mb-4">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-100 to-purple-200" />
+                <div className="absolute w-full h-36 bg-red-600 top-1/2 -translate-y-1/2 transform -rotate-45 flex items-center justify-center">
+                  <span className="text-white text-3xl font-bold tracking-wider">COMING SOON!</span>
+                </div>
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Yarns of Wisdom</h3>
+              <p className="text-sm text-muted-foreground">
+                A collection of heartwarming stories and life lessons learned through the art of crafting.
+              </p>
+            </Card>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="p-6 backdrop-blur-sm bg-background/80">
+              <h3 className="text-xl font-semibold mb-4">About Leola</h3>
+              <p className="text-muted-foreground">
+                Known affectionately as "Sista Lee," Leola brings warmth and wisdom to every story she writes. 
+                With decades of experience in crafting and storytelling, she weaves tales that inspire and 
+                connect readers across generations. Her unique blend of practical wisdom and heartfelt narrative 
+                has made her a beloved figure in both the crafting and storytelling communities.
+              </p>
+            </Card>
+
+            <Card className="p-6 backdrop-blur-sm bg-background/80">
+              <h3 className="text-xl font-semibold mb-4">Coming Soon</h3>
+              <p className="text-muted-foreground">
+                Stay tuned for more heartwarming stories from Leola's collection, including new crafting guides,
+                personal memoirs, and tales of community connection. Join our mailing list to be the first to 
+                know about new releases and special events.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <!-- Background -->
+  <rect width="800" height="400" fill="#000000"/>
+  
+  <!-- Orbital Paths -->
+  <ellipse cx="200" cy="200" rx="50" ry="50" fill="none" stroke="#3AF8FF" stroke-width="1" opacity="0.2">
+    <animate attributeName="opacity" values="0.2;0.4;0.2" dur="3s" repeatCount="indefinite"/>
+  </ellipse>
+  
+  <ellipse cx="400" cy="150" rx="70" ry="70" fill="none" stroke="#FF00FF" stroke-width="1" opacity="0.2">
+    <animate attributeName="opacity" values="0.2;0.4;0.2" dur="4s" repeatCount="indefinite"/>
+  </ellipse>
+  
+  <ellipse cx="600" cy="200" rx="60" ry="60" fill="none" stroke="#00FF9F" stroke-width="1" opacity="0.2">
+    <animate attributeName="opacity" values="0.2;0.4;0.2" dur="3.5s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- Attraction Points -->
+  <circle cx="200" cy="200" r="4" fill="#3AF8FF">
+    <animate attributeName="r" values="4;6;4" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="400" cy="150" r="4" fill="#FF00FF">
+    <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="600" cy="200" r="4" fill="#00FF9F">
+    <animate attributeName="r" values="4;6;4" dur="2.2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Orbiting Particles -->
+  <!-- Blue Orbital Group -->
+  <g>
+    <circle cx="200" cy="200" r="3" fill="#3AF8FF">
+      <animateTransform
+        attributeName="transform"
+        type="rotate"
+        from="0 200 200"
+        to="360 200 200"
+        dur="3s"
+        repeatCount="indefinite"/>
+    </circle>
+    <circle cx="200" cy="150" r="2" fill="#99FFFF">
+      <animateTransform
+        attributeName="transform"
+        type="rotate"
+        from="120 200 200"
+        to="480 200 200"
+        dur="3s"
+        repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Magenta Orbital Group -->
+  <g>
+    <circle cx="400" cy="80" r="3" fill="#FF00FF">
+      <animateTransform
+        attributeName="transform"
+        type="rotate"
+        from="0 400 150"
+        to="360 400 150"
+        dur="4s"
+        repeatCount="indefinite"/>
+    </circle>
+    <circle cx="400" cy="220" r="2" fill="#FF99FF">
+      <animateTransform
+        attributeName="transform"
+        type="rotate"
+        from="180 400 150"
+        to="540 400 150"
+        dur="4s"
+        repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Green Orbital Group -->
+  <g>
+    <circle cx="600" cy="140" r="3" fill="#00FF9F">
+      <animateTransform
+        attributeName="transform"
+        type="rotate"
+        from="0 600 200"
+        to="360 600 200"
+        dur="3.5s"
+        repeatCount="indefinite"/>
+    </circle>
+    <circle cx="600" cy="260" r="2" fill="#99FFCC">
+      <animateTransform
+        attributeName="transform"
+        type="rotate"
+        from="240 600 200"
+        to="600 600 200"
+        dur="3.5s"
+        repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Particle Trails -->
+  <path d="M200,150 Q220,180 200,200" stroke="#3AF8FF" stroke-width="1" fill="none" opacity="0.5">
+    <animate attributeName="d" 
+      values="M200,150 Q220,180 200,200;M200,200 Q180,220 200,250;M200,150 Q220,180 200,200" 
+      dur="3s" 
+      repeatCount="indefinite"/>
+  </path>
+
+  <path d="M400,80 Q420,110 400,150" stroke="#FF00FF" stroke-width="1" fill="none" opacity="0.5">
+    <animate attributeName="d" 
+      values="M400,80 Q420,110 400,150;M400,150 Q380,190 400,220;M400,80 Q420,110 400,150" 
+      dur="4s" 
+      repeatCount="indefinite"/>
+  </path>
+
+  <path d="M600,140 Q620,170 600,200" stroke="#00FF9F" stroke-width="1" fill="none" opacity="0.5">
+    <animate attributeName="d" 
+      values="M600,140 Q620,170 600,200;M600,200 Q580,230 600,260;M600,140 Q620,170 600,200" 
+      dur="3.5s" 
+      repeatCount="indefinite"/>
+  </path>
+
+  <!-- Text Labels -->
+  <text x="400" y="350" fill="#FFFFFF" font-family="Arial" font-size="14" text-anchor="middle">
+    Gravitational Particle System Preview
+  </text>
+  <text x="400" y="370" fill="#999999" font-family="Arial" font-size="12" text-anchor="middle">
+    Particles orbit attraction points before forming dashboard elements
+  </text>
+</svg>

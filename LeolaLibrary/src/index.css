@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* 3D Card Flip Effect */
+.perspective {
+  perspective: 1000px;
+}
+
+.backface-hidden {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+/* Enhanced Glassmorphism */
+.glass {
+  @apply bg-background/80 backdrop-blur-sm border-primary/20;
+}
+
+/* Gradient Text Effects */
+.gradient-text {
+  @apply bg-gradient-to-r from-primary to-primary/50 bg-clip-text text-transparent;
+}
+
+/* Particle Background Container */
+.particle-container {
+  @apply fixed inset-0 pointer-events-none overflow-hidden;
+  z-index: -1;
+}
+
+/* Content Layer */
+.content-layer {
+  @apply relative z-10;
+}

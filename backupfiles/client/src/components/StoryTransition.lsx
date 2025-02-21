@@ -1,0 +1,129 @@
+import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+
+interface StoryTransitionProps {
+  children: React.ReactNode;
+  character?: 'needle' | 'yarn' | 'scissors' | 'thimble' | 'measuring-tape';
+  isVisible: boolean;
+}
+
+const characterAnimations = {
+  needle: {
+    initial: { x: '-100%', rotate: -45 },
+    animate: { 
+      x: 0, 
+      rotate: 0,
+      transition: { 
+        type: "spring",
+        stiffness: 100,
+        damping: 20,
+        duration: 0.8 
+      }
+    },
+    exit: { 
+      x: '100%', 
+      rotate: 45,
+      transition: { duration: 0.5 } 
+    }
+  },
+  yarn: {
+    initial: { 
+      scale: 0,
+      rotate: 0,
+      opacity: 0 
+    },
+    animate: {
+      scale: 1,
+      rotate: 720,
+      opacity: 1,
+      transition: {
+        duration: 1.2,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
+    exit: {
+      scale: 0,
+      rotate: -720,
+      opacity: 0,
+      transition: { duration: 0.8 }
+    }
+  },
+  scissors: {
+    initial: { 
+      scale: 2,
+      rotate: -45,
+      opacity: 0 
+    },
+    animate: {
+      scale: 1,
+      rotate: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      scale: 2,
+      rotate: 45,
+      opacity: 0,
+      transition: { duration: 0.3 }
+    }
+  },
+  thimble: {
+    initial: { y: '-100%', scale: 0.5 },
+    animate: {
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        bounce: 0.5,
+        duration: 0.8
+      }
+    },
+    exit: {
+      y: '100%',
+      scale: 0.5,
+      transition: { duration: 0.5 }
+    }
+  },
+  'measuring-tape': {
+    initial: { scaleX: 0 },
+    animate: {
+      scaleX: 1,
+      transition: {
+        duration: 1,
+        ease: "circOut"
+      }
+    },
+    exit: {
+      scaleX: 0,
+      transition: {
+        duration: 0.7,
+        ease: "circIn"
+      }
+    }
+  }
+};
+
+export const StoryTransition: React.FC<StoryTransitionProps> = ({ 
+  children, 
+  character = 'yarn',
+  isVisible 
+}) => {
+  return (
+    <AnimatePresence mode="wait">
+      {isVisible && (
+        <motion.div
+          key={character}
+          initial={characterAnimations[character].initial}
+          animate={characterAnimations[character].animate}
+          exit={characterAnimations[character].exit}
+          className="w-full h-full"
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};

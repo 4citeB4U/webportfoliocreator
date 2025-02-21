@@ -1,0 +1,237 @@
+import React from 'react';
+import {
+  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
+const ExecutiveDashboard = () => {
+  // Market Impact Data
+  const marketImpactData = [
+    { metric: 'Industry Gap Fulfillment', value: 45 },
+    { metric: 'Job Placement Rate', value: 85 },
+    { metric: 'Average Salary Increase', value: 65 },
+    { metric: 'Community ROI', value: 175 }
+  ];
+
+  // Financial Projections
+  const financialData = [
+    { year: '2024', revenue: 150000, expenses: 130000, students: 20, surplus: 20000 },
+    { year: '2025', revenue: 300000, expenses: 250000, students: 40, surplus: 50000 },
+    { year: '2026', revenue: 450000, expenses: 380000, students: 60, surplus: 70000 }
+  ];
+
+  // Revenue Sources
+  const revenueSourcesData = [
+    { source: 'Program Fees', value: 50 },
+    { source: 'Government Grants', value: 25 },
+    { source: 'Corporate Partnerships', value: 15 },
+    { source: 'Donations', value: 10 }
+  ];
+
+  // Graduate Success Metrics
+  const successMetrics = [
+    { month: 'Jan', placementRate: 82, salaryAverage: 62000 },
+    { month: 'Feb', placementRate: 84, salaryAverage: 63000 },
+    { month: 'Mar', placementRate: 85, salaryAverage: 64000 },
+    { month: 'Apr', placementRate: 86, salaryAverage: 64500 },
+    { month: 'May', placementRate: 87, salaryAverage: 65000 },
+    { month: 'Jun', placementRate: 85, salaryAverage: 65000 }
+  ];
+
+  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042'];
+
+  return (
+    <div className="max-w-7xl mx-auto bg-white p-8">
+      {/* Header */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-4">Pro Driver Academy</h1>
+        <h2 className="text-2xl mb-4">Executive Summary</h2>
+        <div className="max-w-3xl mx-auto">
+          <p className="text-gray-600 mb-4">
+            Addressing Wisconsin's critical CDL driver shortage through comprehensive, 
+            accessible training that transforms individuals into professional drivers while 
+            maintaining financial sustainability.
+          </p>
+        </div>
+      </div>
+
+      {/* Key Metrics Overview */}
+      <section className="mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Key Performance Indicators</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-2">Students Trained</h3>
+                <p className="text-3xl font-bold">60+</p>
+                <p className="text-sm text-gray-600">Year 3 Target</p>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-2">Job Placement</h3>
+                <p className="text-3xl font-bold">85%</p>
+                <p className="text-sm text-gray-600">Success Rate</p>
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-2">Graduate Salary</h3>
+                <p className="text-3xl font-bold">$65K</p>
+                <p className="text-sm text-gray-600">Average</p>
+              </div>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-2">Community Impact</h3>
+                <p className="text-3xl font-bold">$1.75M</p>
+                <p className="text-sm text-gray-600">Annual Economic Impact</p>
+              </div>
+            </div>
+
+            {/* Market Impact Chart */}
+            <div className="h-72">
+              <ResponsiveContainer>
+                <BarChart data={marketImpactData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="metric" type="category" width={150} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Financial Overview */}
+      <section className="mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Financial Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Revenue Projections */}
+              <div className="h-72">
+                <h3 className="text-lg font-semibold mb-4">3-Year Projections</h3>
+                <ResponsiveContainer>
+                  <LineChart data={financialData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="year" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#8884d8" />
+                    <Line type="monotone" dataKey="expenses" name="Expenses" stroke="#82ca9d" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Revenue Sources */}
+              <div className="h-72">
+                <h3 className="text-lg font-semibold mb-4">Revenue Sources</h3>
+                <ResponsiveContainer>
+                  <PieChart>
+                    <Pie
+                      data={revenueSourcesData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {revenueSourcesData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Impact & Success */}
+      <section className="mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Graduate Success Metrics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-72">
+              <ResponsiveContainer>
+                <LineChart data={successMetrics}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip />
+                  <Legend />
+                  <Line 
+                    yAxisId="left"
+                    type="monotone" 
+                    dataKey="placementRate" 
+                    name="Placement Rate (%)" 
+                    stroke="#8884d8" 
+                  />
+                  <Line 
+                    yAxisId="right"
+                    type="monotone" 
+                    dataKey="salaryAverage" 
+                    name="Average Salary ($)" 
+                    stroke="#82ca9d" 
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Strategic Advantages */}
+      <section className="mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Strategic Advantages</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="border rounded-lg p-4 bg-purple-50">
+                <h3 className="font-semibold mb-2">Market Position</h3>
+                <ul className="list-disc pl-6 text-sm">
+                  <li>Addresses critical workforce gap</li>
+                  <li>Strong industry partnerships</li>
+                  <li>Comprehensive training program</li>
+                  <li>Focus on accessibility</li>
+                </ul>
+              </div>
+              <div className="border rounded-lg p-4 bg-blue-50">
+                <h3 className="font-semibold mb-2">Social Impact</h3>
+                <ul className="list-disc pl-6 text-sm">
+                  <li>Career pathway creation</li>
+                  <li>Economic mobility</li>
+                  <li>Community development</li>
+                  <li>Industry support</li>
+                </ul>
+              </div>
+              <div className="border rounded-lg p-4 bg-green-50">
+                <h3 className="font-semibold mb-2">Sustainability</h3>
+                <ul className="list-disc pl-6 text-sm">
+                  <li>Diverse revenue streams</li>
+                  <li>Strong partnerships</li>
+                  <li>Scalable model</li>
+                  <li>Proven outcomes</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    </div>
+  );
+};
+
+export default ExecutiveDashboard;

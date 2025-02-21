@@ -1,0 +1,54 @@
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Settings, LogOut } from "lucide-react";
+
+export function Navbar() {
+  return (
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center px-4 max-w-7xl mx-auto">
+        <div className="flex flex-1 items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link href="/" className="font-bold text-xl text-primary">
+              Rapid Web Developer
+            </Link>
+            <div className="flex items-center space-x-2">
+              <Link href="/projects/pro-driver-academy">
+                <Button variant="ghost" size="sm">
+                  Pro Driver Academy
+                </Button>
+              </Link>
+              <Link href="/projects/leolas-library">
+                <Button variant="ghost" size="sm">
+                  Leola's Library
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Link href="/admin">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Admin Dashboard
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 text-destructive"
+              >
+                <LogOut className="h-4 w-4" />
+                Return to WPD
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+}

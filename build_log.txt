@@ -1,0 +1,2 @@
+=== Web Portfolio Creator Fix and Build Log ===
+❌ ERROR: Tailwind CSS failed to compile in LeolaLibrary. Check the configuration.

@@ -1,0 +1,172 @@
+import React, { useState, useRef } from 'react';
+import { Headphones, ChevronLeft, ChevronRight, Gift, Settings, Book, Home } from 'lucide-react';
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { FloatingEmojis } from '@/components/FloatingEmojis';
+import { useToast } from '@/hooks/use-toast';
+import { useSpeech } from '@/hooks/use-speech';
+import LeolasBackground from '@/components/LeolasBackground';
+import { BookCover } from '@/components/BookCover';
+
+const BOOKS = [
+  {
+    id: 'needle-and-yarn',
+    title: "Needle & Yarn: A Love Stitched in Time",
+    description: "A tale of love, crafting, and finding meaning in the threads that connect us all.",
+    isAvailable: true,
+    storyImages: [
+      'assets/7b204938-26a9-457f-ad42-5bbc01db997d.webp',
+      'assets/74203252-df7b-49ab-a2fe-822a69ddc10b.webp',
+      'assets/c2d9064a-6b4d-406a-9efd-001ccab4bb70.webp',
+      'assets/ff8b7b27-a6b2-4dd3-9f9f-6b16b90b4de7.webp'
+    ],
+    previewText: `Yarn was filled with happiness, tears welled up and she confessed she loved him too...`
+  },
+  {
+    id: 'crochet-mastery',
+    title: "Crochet Mastery Guide",
+    description: "A comprehensive guide to mastering the art of crochet, with step-by-step instructions.",
+    isAvailable: true,
+    previewText: "Welcome to the world of crochet..."
+  },
+  {
+    id: 'yarns-of-wisdom',
+    title: "Yarns of Wisdom",
+    description: "A collection of heartwarming stories and life lessons learned through the art of crafting.",
+    isAvailable: false,
+    isNext: true
+  }
+];
+
+export default function BookshelfPage() {
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const { speak, stop } = useSpeech();
+  const [previewingBook, setPreviewingBook] = useState<string | null>(null);
+  const previewTimerRef = useRef<NodeJS.Timeout>();
+
+  // Function to remove emojis and special characters from text
+  const removeEmojis = (text: string) => {
+    // First remove emoji ranges
+    const withoutEmojis = text.replace(
+      /[\u{1F000}-\u{1F9FF}]|[\u{1F300}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F1E6}-\u{1F1FF}]/gu, 
+      ''
+    );
+    // Then remove any remaining special characters and clean up whitespace
+    return withoutEmojis
+      .replace(/[^\x20-\x7E]/g, '') // Remove non-printable characters
+      .replace(/\s+/g, ' ')         // Normalize whitespace
+      .trim();                      // Trim extra spaces
+  };
+
+  const handleBookClick = (book: typeof BOOKS[0]) => {
+    if (!book.isAvailable) {
+      toast({
+        title: "Coming Soon!",
+        description: "This book will be available in the near future. Stay tuned!",
+        variant: "default"
+      });
+      return;
+    }
+    navigate(`/books/${book.id}`);
+  };
+
+  const handlePreview = (book: typeof BOOKS[0], e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!book.isAvailable || !book.previewText) return;
+
+    if (previewingBook === book.id) {
+      stop();
+      setPreviewingBook(null);
+      if (previewTimerRef.current) {
+        clearTimeout(previewTimerRef.current);
+      }
+      return;
+    }
+
+    // Stop any ongoing preview
+    stop();
+    setPreviewingBook(book.id);
+
+    // Remove emojis and clean text before speaking
+    const cleanText = removeEmojis(book.previewText);
+    console.log('Clean text for speech:', cleanText); // Debug log
+
+    // Start new preview with 15-second timeout
+    speak(cleanText, () => {
+      setPreviewingBook(null);
+    });
+
+    previewTimerRef.current = setTimeout(() => {
+      stop();
+      setPreviewingBook(null);
+    }, 15000);
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="fixed inset-0 w-full h-full overflow-hidden">
+        <LeolasBackground />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-20 py-8 flex flex-col flex-grow">
+        <h1 className="text-4xl font-bold text-center mb-12 text-white">Leola's Digital Library</h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {BOOKS.map((book) => (
+            <div
+              key={book.id}
+              className="relative group cursor-pointer transform transition-transform duration-300 hover:scale-105"
+              onClick={() => handleBookClick(book)}
+            >
+              <div className="aspect-[3/4] rounded-lg overflow-hidden shadow-lg relative bg-white/10 backdrop-blur-sm">
+                {book.isNext ? (
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-100 to-purple-200">
+                    <div className="absolute w-full h-36 bg-red-600 top-1/2 -translate-y-1/2 transform -rotate-45 flex items-center justify-center">
+                      <span className="text-white text-3xl font-bold tracking-wider">COMING SOON!</span>
+                    </div>
+                  </div>
+                ) : (
+                  <BookCover bookId={book.id} />
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                    <h3 className="text-lg font-semibold mb-2">{book.title}</h3>
+                    <p className="text-sm mb-4">{book.description}</p>
+                    {book.isAvailable && (
+                      <button
+                        onClick={(e) => handlePreview(book, e)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
+                          previewingBook === book.id
+                            ? "bg-purple-600 hover:bg-purple-700"
+                            : "bg-purple-500 hover:bg-purple-600"
+                        } transition-colors duration-200`}
+                      >
+                        <Headphones className="w-4 h-4" />
+                        <span>{previewingBook === book.id ? "Stop" : "Listen"}</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {book.id === 'needle-and-yarn' && book.storyImages && (
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  {book.storyImages.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`Story illustration ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

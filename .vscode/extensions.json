@@ -1,0 +1,36 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    "formulahendry.auto-rename-tag",
+    "streetsidesoftware.code-spell-checker",
+    "naumovs.color-highlight",
+    "mikestead.dotenv",
+    "dsznajder.es7-react-js-snippets",
+    "github.vscode-github-actions",
+    "eamodio.gitlens",
+    "visualstudioexptteam.vscodeintellicode",
+    "christian-kohler.path-intellisense",
+    "yoavbls.pretty-ts-errors",
+    "csstools.postcss",
+    "ms-vscode.vscode-typescript-tslint-plugin",
+    "redhat.vscode-yaml",
+    "formulahendry.auto-close-tag",
+    "steoates.autoimport",
+    "mgmcdermott.vscode-language-babel",
+    "editorconfig.editorconfig",
+    "davidanson.vscode-markdownlint",
+    "pkief.material-icon-theme",
+    "christian-kohler.npm-intellisense",
+    "ionutvmi.path-autocomplete",
+    "esbenp.prettier-vscode",
+    "wayou.vscode-todo-highlight"
+  ],
+  "unwantedRecommendations": [
+    "hookyqr.beautify",
+    "dbaeumer.jshint",
+    "ms-vscode.vscode-typescript-tslint-plugin"
+  ]
+}

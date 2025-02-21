@@ -1,0 +1,421 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Layout, Code, Database, Globe, Users, Settings, Activity, Server, Box } from 'lucide-react';
+
+const LoadingDashboard = () => {
+  const canvasRef = useRef(null);
+  const [isForming, setIsForming] = useState(false);
+  const [isDashboardReady, setIsDashboardReady] = useState(false);
+  const particlesRef = useRef([]);
+  const animationFrameRef = useRef();
+  const startTimeRef = useRef(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    // Set black background
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const generateUISequence = () => {
+      const sequences = [];
+      const margin = 40;
+      
+      // Sidebar frame (first)
+      sequences.push({
+        name: 'sidebar-frame',
+        points: [
+          // Left vertical line
+          ...Array.from({ length: 30 }, (_, i) => ({ 
+            x: margin,
+            y: margin + (i * 20),
+            order: i,
+            delay: i * 50
+          })),
+          // Right vertical line
+          ...Array.from({ length: 30 }, (_, i) => ({ 
+            x: 280,
+            y: margin + (i * 20),
+            order: i,
+            delay: i * 50
+          }))
+        ]
+      });
+
+      // Logo area
+      sequences.push({
+        name: 'logo',
+        points: [
+          // Globe icon outline
+          ...Array.from({ length: 20 }, (_, i) => ({
+            x: margin + 20 + 10 * Math.cos(i * Math.PI / 10),
+            y: margin + 30 + 10 * Math.sin(i * Math.PI / 10),
+            order: i,
+            delay: i * 30
+          })),
+          // Text underline
+          ...Array.from({ length: 15 }, (_, i) => ({
+            x: margin + 50 + (i * 10),
+            y: margin + 40,
+            order: i,
+            delay: i * 30
+          }))
+        ]
+      });
+
+      // Navigation buttons (draw one by one)
+      const navItems = ['Dashboard', 'Projects', 'Databases', 'Hosting', 'Resources'];
+      navItems.forEach((_, index) => {
+        sequences.push({
+          name: `nav-${index}`,
+          points: [
+            // Button outline
+            ...Array.from({ length: 40 }, (_, i) => {
+              const x = margin + 10 + (i < 10 || (i >= 20 && i < 30) ? (i % 10) * 20 : 0);
+              const y = margin + 80 + (index * 50) + (i >= 10 && i < 30 ? (i % 10) * 4 : 0);
+              return { x, y, order: i, delay: i * 20 };
+            }),
+            // Icon placeholder
+            ...Array.from({ length: 12 }, (_, i) => ({
+              x: margin + 20 + 8 * Math.cos(i * Math.PI / 6),
+              y: margin + 80 + (index * 50) + 20 + 8 * Math.sin(i * Math.PI / 6),
+              order: i,
+              delay: i * 30 + 800
+            }))
+          ]
+        });
+      });
+
+      // Main content frame
+      sequences.push({
+        name: 'main-frame',
+        points: [
+          // Top header
+          ...Array.from({ length: 40 }, (_, i) => ({
+            x: 300 + (i * 20),
+            y: margin,
+            order: i,
+            delay: i * 30
+          })),
+          // Top section cards
+          ...Array.from({ length: 3 }, (cardIndex) => 
+            Array.from({ length: 40 }, (_, i) => {
+              const cardWidth = 300;
+              const startX = 300 + (cardIndex * (cardWidth + 20));
+              const x = startX + (i < 10 || (i >= 20 && i < 30) ? (i % 10) * (cardWidth/10) : 0);
+              const y = margin + 60 + (i >= 10 && i < 30 ? (i % 10) * 10 : 0);
+              return { x, y, order: i, delay: i * 20 + cardIndex * 800 };
+            })
+          ).flat()
+        ]
+      });
+
+      // Bottom panels
+      sequences.push({
+        name: 'bottom-panels',
+        points: [
+          // Left panel
+          ...Array.from({ length: 60 }, (_, i) => {
+            const x = 300 + (i < 15 || (i >= 30 && i < 45) ? (i % 15) * 25 : 0);
+            const y = margin + 200 + (i >= 15 && i < 45 ? (i % 15) * 20 : 0);
+            return { x, y, order: i, delay: i * 20 };
+          }),
+          // Right panel
+          ...Array.from({ length: 60 }, (_, i) => {
+            const x = 700 + (i < 15 || (i >= 30 && i < 45) ? (i % 15) * 25 : 0);
+            const y = margin + 200 + (i >= 15 && i < 45 ? (i % 15) * 20 : 0);
+            return { x, y, order: i, delay: i * 20 };
+          })
+        ]
+      });
+
+      return sequences.flat().map(seq => seq.points).flat();
+    };
+
+    const allPoints = generateUISequence();
+    const particleCount = allPoints.length;
+
+    // Create particles for each point in the sequence
+    for (let i = 0; i < particleCount; i++) {
+      const targetPoint = allPoints[i];
+      particlesRef.current.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 3 + 1.5,
+        speedX: (Math.random() - 0.5) * 3,
+        speedY: (Math.random() - 0.5) * 3,
+        color: ['#FF00FF', '#00FFFF', '#FF2E97', '#3AF8FF', '#C400FF', '#00FF9F'][
+          Math.floor(Math.random() * 6)
+        ],
+        opacity: 0.8,
+        targetX: targetPoint.x,
+        targetY: targetPoint.y,
+        moving: false,
+        startDelay: targetPoint.delay,
+        trailPoints: []
+      });
+    }
+
+    const animate = () => {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      particlesRef.current.forEach(particle => {
+        // Update
+        const currentTime = Date.now() - startTimeRef.current;
+        
+        if (isForming && !particle.moving && currentTime > particle.startDelay) {
+          // Start moving to target position
+          particle.moving = true;
+          const dx = particle.targetX - particle.x;
+          const dy = particle.targetY - particle.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          particle.speedX = (dx / distance) * 5;
+          particle.speedY = (dy / distance) * 5;
+        }
+
+        if (particle.moving) {
+          // Add trail point
+          if (particle.trailPoints.length < 5) {
+            particle.trailPoints.push({ x: particle.x, y: particle.y });
+          } else {
+            particle.trailPoints.shift();
+            particle.trailPoints.push({ x: particle.x, y: particle.y });
+          }
+
+          // Move towards target
+          const dx = particle.targetX - particle.x;
+          const dy = particle.targetY - particle.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < 1) {
+            particle.x = particle.targetX;
+            particle.y = particle.targetY;
+            particle.speedX = 0;
+            particle.speedY = 0;
+          } else {
+            particle.x += particle.speedX;
+            particle.y += particle.speedY;
+          }
+        } else {
+          // Free movement
+          particle.x += particle.speedX;
+          particle.y += particle.speedY;
+          
+          if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
+          if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
+        }
+
+        // Draw
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = particle.color;
+        
+        // Draw trail
+        if (particle.moving && particle.trailPoints.length > 0) {
+          ctx.beginPath();
+          ctx.moveTo(particle.trailPoints[0].x, particle.trailPoints[0].y);
+          particle.trailPoints.forEach(point => {
+            ctx.lineTo(point.x, point.y);
+          });
+          ctx.lineTo(particle.x, particle.y);
+          ctx.strokeStyle = particle.color;
+          ctx.lineWidth = particle.size / 2;
+          ctx.stroke();
+        }
+        
+        // Draw particle
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fillStyle = particle.color;
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        // Draw
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = particle.color;
+        
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fillStyle = particle.color;
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        
+        ctx.shadowBlur = 0;
+      });
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    setTimeout(() => {
+      setIsForming(true);
+      setTimeout(() => setIsDashboardReady(true), 3000);
+    }, 3000);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
+  const Dashboard = () => (
+    <div className="flex h-screen bg-black">
+      <div className="w-60 bg-gray-900/50 backdrop-blur-sm p-4 text-gray-300 border-r border-cyan-500/20">
+        <div className="flex items-center mb-8">
+          <Globe className="w-6 h-6 mr-2 text-cyan-400" />
+          <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 text-transparent bg-clip-text">
+            WebDev Console
+          </h1>
+        </div>
+        
+        <nav className="space-y-4">
+          <button className="flex items-center w-full p-2 rounded hover:bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <Layout className="w-5 h-5 mr-3" />
+            Dashboard
+          </button>
+          <button className="flex items-center w-full p-2 rounded hover:bg-purple-500/10 border border-transparent hover:border-purple-500/20">
+            <Code className="w-5 h-5 mr-3" />
+            Projects
+          </button>
+          <button className="flex items-center w-full p-2 rounded hover:bg-pink-500/10 border border-transparent hover:border-pink-500/20">
+            <Database className="w-5 h-5 mr-3" />
+            Databases
+          </button>
+          <button className="flex items-center w-full p-2 rounded hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20">
+            <Server className="w-5 h-5 mr-3" />
+            Hosting
+          </button>
+          <button className="flex items-center w-full p-2 rounded hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20">
+            <Box className="w-5 h-5 mr-3" />
+            Resources
+          </button>
+        </nav>
+      </div>
+
+      <div className="flex-1 bg-black p-8">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 text-transparent bg-clip-text">
+            Project Overview
+          </h2>
+          <div className="flex space-x-4">
+            <button className="px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded border border-cyan-500/40 hover:bg-cyan-500/30 backdrop-blur-sm">
+              New Project
+            </button>
+            <button className="p-2 bg-purple-500/20 text-purple-400 rounded border border-purple-500/40 hover:bg-purple-500/30 backdrop-blur-sm">
+              <Settings className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6 mb-8">
+          <div className="bg-gray-900/50 backdrop-blur-sm p-6 rounded-lg border border-cyan-500/20 hover:border-cyan-500/40 transition-colors">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-cyan-400/80 text-sm">Active Deployments</p>
+                <h3 className="text-2xl font-bold text-cyan-400 mt-1">24</h3>
+              </div>
+              <span className="bg-cyan-500/20 p-2 rounded border border-cyan-500/40">
+                <Globe className="w-6 h-6 text-cyan-400" />
+              </span>
+            </div>
+          </div>
+          
+          <div className="bg-gray-900/50 backdrop-blur-sm p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-colors">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-purple-400/80 text-sm">Server Status</p>
+                <h3 className="text-2xl font-bold text-purple-400 mt-1">99.9%</h3>
+              </div>
+              <span className="bg-purple-500/20 p-2 rounded border border-purple-500/40">
+                <Activity className="w-6 h-6 text-purple-400" />
+              </span>
+            </div>
+          </div>
+          
+          <div className="bg-gray-900/50 backdrop-blur-sm p-6 rounded-lg border border-pink-500/20 hover:border-pink-500/40 transition-colors">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-pink-400/80 text-sm">Active Users</p>
+                <h3 className="text-2xl font-bold text-pink-400 mt-1">1,234</h3>
+              </div>
+              <span className="bg-pink-500/20 p-2 rounded border border-pink-500/40">
+                <Users className="w-6 h-6 text-pink-400" />
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div className="bg-gray-900/50 backdrop-blur-sm p-6 rounded-lg border border-cyan-500/20">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-cyan-400 to-purple-400 text-transparent bg-clip-text mb-4">
+              Recent Deployments
+            </h3>
+            <div className="space-y-4">
+              {[1, 2, 3].map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-gray-800/50 rounded border border-cyan-500/10 hover:border-cyan-500/30 transition-colors">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-cyan-500 rounded-full mr-3 shadow-lg shadow-cyan-500/50" />
+                    <span className="text-cyan-400/90">Project {i + 1}</span>
+                  </div>
+                  <span className="text-cyan-400/70 text-sm">2m ago</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="bg-gray-900/50 backdrop-blur-sm p-6 rounded-lg border border-purple-500/20">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text mb-4">
+              Resource Usage
+            </h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-purple-400/80">CPU Usage</span>
+                  <span className="text-purple-400">45%</span>
+                </div>
+                <div className="h-2 bg-gray-800/50 rounded border border-purple-500/20">
+                  <div className="h-full w-5/12 bg-gradient-to-r from-purple-500 to-pink-500 rounded shadow-lg shadow-purple-500/50" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-pink-400/80">Memory Usage</span>
+                  <span className="text-pink-400">68%</span>
+                </div>
+                <div className="h-2 bg-gray-800/50 rounded border border-pink-500/20">
+                  <div className="h-full w-8/12 bg-gradient-to-r from-pink-500 to-purple-500 rounded shadow-lg shadow-pink-500/50" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="relative w-full h-screen">
+      <canvas
+        ref={canvasRef}
+        className={`absolute inset-0 ${isDashboardReady ? 'opacity-0' : 'opacity-100'} transition-opacity duration-1000`}
+      />
+      <div className={`absolute inset-0 ${isDashboardReady ? 'opacity-100' : 'opacity-0'} transition-opacity duration-1000`}>
+        {isDashboardReady && <Dashboard />}
+      </div>
+    </div>
+  );
+};
+
+export default LoadingDashboard;

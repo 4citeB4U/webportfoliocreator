@@ -1,0 +1,200 @@
+import { useAuth } from "@/hooks/use-auth";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { insertUserSchema, type InsertUser } from "@shared/schema";
+import { Redirect, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+type LoginData = Pick<InsertUser, "username" | "password">;
+
+export default function AuthPage() {
+  const [, params] = useLocation();
+  const { user, loginMutation, registerMutation } = useAuth();
+
+  const loginForm = useForm<LoginData>({
+    resolver: zodResolver(insertUserSchema.pick({ username: true, password: true })),
+    defaultValues: {
+      username: "",
+      password: ""
+    }
+  });
+
+  const registerForm = useForm<InsertUser>({
+    resolver: zodResolver(insertUserSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      email: "",
+      role: "viewer"
+    }
+  });
+
+  if (user) {
+    return <Redirect to="/dashboard" />;
+  }
+
+  const searchParams = new URLSearchParams(params);
+  const defaultTab = searchParams.get("tab") === "register" ? "register" : "login";
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <div className="space-y-2 text-center">
+            <h1 className="text-3xl font-bold">Rapid Web Developer</h1>
+            <p className="text-muted-foreground">
+              Create and manage professional websites with ease
+            </p>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Welcome</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue={defaultTab}>
+                <TabsList className="grid grid-cols-2 w-full">
+                  <TabsTrigger value="login">Sign In</TabsTrigger>
+                  <TabsTrigger value="register">Create Account</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="login">
+                  <Form {...loginForm}>
+                    <form
+                      onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))}
+                      className="space-y-4"
+                    >
+                      <FormField
+                        control={loginForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Username</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={loginForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={loginMutation.isPending}
+                      >
+                        Sign In
+                      </Button>
+                    </form>
+                  </Form>
+                </TabsContent>
+
+                <TabsContent value="register">
+                  <Form {...registerForm}>
+                    <form
+                      onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))}
+                      className="space-y-4"
+                    >
+                      <FormField
+                        control={registerForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Username</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={registerForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input type="email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={registerForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={registerMutation.isPending}
+                      >
+                        Create Account
+                      </Button>
+                    </form>
+                  </Form>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="hidden lg:block">
+          <div className="h-full flex flex-col justify-center space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold">Why Choose Rapid Web Developer?</h2>
+              <ul className="space-y-2 text-muted-foreground">
+                <li>Quick and easy website creation</li>
+                <li>Professional templates and components</li>
+                <li>Real-time statistics and analytics</li>
+                <li>Secure user management</li>
+                <li>Full ownership options available</li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold">Featured Projects</h2>
+              <ul className="space-y-2 text-muted-foreground">
+                <li>Pro Driver Academy</li>
+                <li>Small Business Solutions</li>
+                <li>Portfolio Websites</li>
+                <li>E-commerce Platforms</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

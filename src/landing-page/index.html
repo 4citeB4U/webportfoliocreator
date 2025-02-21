@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Creation Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary-neon: #00ffff;
+            --secondary-neon: #ff00ff;
+            --accent-green: #00ff00;
+            --accent-blue: #0077ff;
+            --dark-bg: #000913;
+            --card-bg: rgba(0, 9, 19, 0.8);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--dark-bg);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease-out;
+            background: linear-gradient(180deg, rgba(0,255,255,0.1) 0%, transparent 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(0,255,255,0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary-neon), var(--secondary-neon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0,255,255,0.5);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--primary-neon);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 1rem;
+            text-shadow: 0 0 10px var(--primary-neon);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            animation: slideUp 0.5s ease-out forwards;
+            opacity: 0;
+            border: 1px solid rgba(0,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .project-card:nth-child(1) { animation-delay: 0.2s; }
+        .project-card:nth-child(2) { animation-delay: 0.4s; }
+        .project-card:nth-child(3) { animation-delay: 0.6s; }
+
+        .project-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--primary-neon);
+            box-shadow: 0 0 30px rgba(0,255,255,0.2);
+        }
+
+        .project-card h2 {
+            color: var(--primary-neon);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px var(--primary-neon);
+        }
+
+        .project-card p {
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .qr-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto;
+            perspective: 1000px;
+            margin-bottom: 1.5rem;
+        }
+
+        .qr-flipper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .qr-container:hover .qr-flipper {
+            transform: rotateY(180deg);
+        }
+
+        .qr-code, .qr-preview {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-code {
+            background: rgba(0, 9, 19, 0.9);
+            border: 2px solid rgba(0,255,255,0.3);
+            z-index: 2;
+        }
+
+        .qr-preview {
+            background: rgba(0,255,255,0.1);
+            transform: rotateY(180deg);
+            padding: 1rem;
+            border: 2px solid var(--primary-neon);
+            color: white;
+        }
+
+        .qr-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, var(--primary-neon), var(--accent-blue));
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: btnShine 3s infinite;
+        }
+
+        @keyframes btnShine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <div class="content">
+        <header>
+            <h1>Portfolio Creation Platform</h1>
+            <div class="subtitle">Design • Create • Deploy</div>
+        </header>
+
+        <div class="projects-grid">
+            <div class="project-card">
+                <h2>Agent Lee</h2>
+                <p>AI-powered development assistant for portfolio creation and management</p>
+                <div class="qr-container">
+                    <div class="qr-flipper">
+                        <div class="qr-code" id="agent-lee-qr"></div>
+                        <div class="qr-preview">
+                            <p>Advanced AI assistant with natural language processing and code generation capabilities</p>
+                        </div>
+                    </div>
+                </div>
+                <a href="/agent-lee" class="btn">Launch Assistant</a>
+            </div>
+
+            <div class="project-card">
+                <h2>ProDriver Academy</h2>
+                <p>Professional driving education and certification platform</p>
+                <div class="qr-container">
+                    <div class="qr-flipper">
+                        <div class="qr-code" id="prodriver-qr"></div>
+                        <div class="qr-preview">
+                            <p>Comprehensive learning platform for professional drivers with interactive courses and certifications</p>
+                        </div>
+                    </div>
+                </div>
+                <a href="/prodriver" class="btn">View Academy</a>
+            </div>
+
+            <div class="project-card">
+                <h2>Leola's Library</h2>
+                <p>Educational resource management system</p>
+                <div class="qr-container">
+                    <div class="qr-flipper">
+                        <div class="qr-code" id="leola-qr"></div>
+                        <div class="qr-preview">
+                            <p>Digital library system with advanced resource management and educational tools</p>
+                        </div>
+                    </div>
+                </div>
+                <a href="/leola" class="btn">Enter Library</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Particles.js Configuration
+        document.addEventListener('DOMContentLoaded', () => {
+            particlesJS('particles-js', {
+                particles: {
+                    number: {
+                        value: 80,
+                        density: {
+                            enable: true,
+                            value_area: 800
+                        }
+                    },
+                    color: {
+                        value: ["#00ffff", "#ff00ff", "#00ff00"]
+                    },
+                    shape: {
+                        type: "circle"
+                    },
+                    opacity: {
+                        value: 0.5,
+                        random: true,
+                        anim: {
+                            enable: true,
+                            speed: 1,
+                            opacity_min: 0.1,
+                            sync: false
+                        }
+                    },
+                    size: {
+                        value: 3,
+                        random: true,
+                        anim: {
+                            enable: true,
+                            speed: 2,
+                            size_min: 0.1,
+                            sync: false
+                        }
+                    },
+                    line_linked: {
+                        enable: true,
+                        distance: 150,
+                        color: "#00ffff",
+                        opacity: 0.4,
+                        width: 1
+                    },
+                    move: {
+                        enable: true,
+                        speed: 2,
+                        direction: "none",
+                        random: false,
+                        straight: false,
+                        out_mode: "out",
+                        bounce: false,
+                        attract: {
+                            enable: true,
+                            rotateX: 600,
+                            rotateY: 1200
+                        }
+                    }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: {
+                        onhover: {
+                            enable: true,
+                            mode: "grab"
+                        },
+                        onclick: {
+                            enable: true,
+                            mode: "push"
+                        },
+                        resize: true
+                    },
+                    modes: {
+                        grab: {
+                            distance: 140,
+                            line_linked: {
+                                opacity: 1
+                            }
+                        },
+                        push: {
+                            particles_nb: 4
+                        }
+                    }
+                },
+                retina_detect: true
+            });
+
+            // Generate QR Codes
+            function generateQR(elementId, url) {
+                const qr = qrcode(0, 'H');
+                qr.addData(window.location.origin + url);
+                qr.make();
+                
+                const qrCode = document.getElementById(elementId);
+                if (qrCode) {
+                    const svgData = qr.createSvgTag(8, 0);
+                    // Add cyan glow effect to QR code
+                    const glowEffect = `<div style="filter: drop-shadow(0 0 10px rgba(0,255,255,0.5));">${svgData}</div>`;
+                    qrCode.innerHTML = glowEffect;
+                }
+            }
+
+            generateQR('agent-lee-qr', '/agent-lee');
+            generateQR('prodriver-qr', '/prodriver');
+            generateQR('leola-qr', '/leola');
+        });
+    </script>
+</body>
+</html>

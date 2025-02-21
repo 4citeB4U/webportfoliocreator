@@ -1,0 +1,196 @@
+import React, { useState, useEffect } from 'react';
+import { Headphones, BookOpen, ChevronRight } from 'lucide-react';
+
+const mockBooks = {
+  'Literature': [
+    { id: 1, title: 'The Great Adventure', author: 'J.R. Smith', color: 'bg-neutral-800', hasAudio: true },
+    { id: 2, title: 'Mystery of the Lake', author: 'M.K. Waters', color: 'bg-neutral-900', hasAudio: false },
+    { id: 3, title: 'The Lost City', author: 'P.D. James', color: 'bg-stone-800', hasAudio: true },
+  ],
+  'Non-Fiction': [
+    { id: 4, title: 'Digital Marketing', author: 'Sarah Chen', color: 'bg-zinc-800', hasAudio: true },
+    { id: 5, title: 'Cloud Computing', author: 'R.R. Miller', color: 'bg-neutral-800', hasAudio: false },
+    { id: 6, title: 'AI Basics', author: 'T.K. Robinson', color: 'bg-stone-900', hasAudio: true },
+  ],
+  'Classics': [
+    { id: 7, title: 'Pride & Prejudice', author: 'Jane Austen', color: 'bg-zinc-900', hasAudio: true },
+    { id: 8, title: '1984', author: 'George Orwell', color: 'bg-stone-800', hasAudio: true },
+    { id: 9, title: 'Moby Dick', author: 'Herman Melville', color: 'bg-neutral-900', hasAudio: false },
+  ]
+};
+
+// Floating Background Component remains the same as it's perfect
+const FloatingBackground = () => {
+  const [particles, setParticles] = useState([]);
+  
+  useEffect(() => {
+    const initialParticles = Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      speedX: (Math.random() - 0.5) * 2,
+      speedY: (Math.random() - 0.5) * 2,
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 3,
+      type: Math.random() > 0.5 ? '🪡' : '🧶',
+      size: 25 + Math.random() * 25,
+      opacity: 0.6 + Math.random() * 0.4
+    }));
+    
+    setParticles(initialParticles);
+    
+    const animate = () => {
+      setParticles(prev => prev.map(particle => {
+        let newX = particle.x + particle.speedX;
+        let newY = particle.y + particle.speedY;
+        let newRotation = particle.rotation + particle.rotationSpeed;
+        
+        if (newX < 0 || newX > window.innerWidth - 40) {
+          particle.speedX *= -1;
+          newX = particle.x;
+        }
+        if (newY < 0 || newY > window.innerHeight - 40) {
+          particle.speedY *= -1;
+          newY = particle.y;
+        }
+        
+        return {
+          ...particle,
+          x: newX,
+          y: newY,
+          rotation: newRotation
+        };
+      }));
+    };
+    
+    const intervalId = setInterval(animate, 50);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 w-full h-full bg-gray-900 pointer-events-none">
+      {particles.map(particle => (
+        <div
+          key={particle.id}
+          className="absolute select-none"
+          style={{
+            left: particle.x,
+            top: particle.y,
+            transform: `rotate(${particle.rotation}deg)`,
+            fontSize: `${particle.size}px`,
+            opacity: particle.opacity,
+            transition: 'transform 0.05s linear',
+            filter: 'brightness(1.2)',
+            textShadow: '0 0 10px rgba(255,255,255,0.3)'
+          }}
+        >
+          {particle.type}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const BookSpine = ({ book, onClick, isSelected }) => (
+  <button
+    onClick={onClick}
+    className={`
+      h-40 w-12 ${book.color} 
+      relative
+      cursor-pointer 
+      transform transition-all duration-300 ease-in-out
+      hover:translate-x-2
+      focus:outline-none focus:ring-1 focus:ring-gray-400
+      ${isSelected ? 'translate-x-4' : ''}
+      flex flex-col justify-center items-center
+      border-r border-gray-700
+    `}
+  >
+    <div className="w-full h-full relative">
+      <div className="absolute -rotate-90 whitespace-nowrap transform origin-left translate-y-8 text-gray-300 text-sm font-light tracking-wider">
+        {book.title}
+      </div>
+      {book.hasAudio && (
+        <div className="absolute bottom-1 right-1">
+          <Headphones className="w-3 h-3 text-gray-400 opacity-70" />
+        </div>
+      )}
+    </div>
+  </button>
+);
+
+const Shelf = ({ name, books, onBookSelect, selectedBook }) => (
+  <div className="mb-16 last:mb-0">
+    <div className="flex items-center mb-4">
+      <h3 className="text-gray-400 text-lg font-light tracking-wider">{name}</h3>
+      <div className="ml-4 h-px bg-gray-700 flex-grow"></div>
+    </div>
+    <div className="bg-neutral-900 p-6 flex gap-4 items-end rounded shadow-xl">
+      {books.map((book) => (
+        <BookSpine
+          key={book.id}
+          book={book}
+          onClick={() => onBookSelect(book)}
+          isSelected={selectedBook?.id === book.id}
+        />
+      ))}
+    </div>
+  </div>
+);
+
+const InteractiveLibrary = () => {
+  const [selectedBook, setSelectedBook] = useState(null);
+
+  return (
+    <div className="min-h-screen bg-gray-900 p-12 relative overflow-hidden">
+      <FloatingBackground />
+      
+      <div className="max-w-5xl mx-auto relative">
+        <h1 className="text-3xl font-light text-gray-300 mb-16 tracking-wider">
+          Digital Collection
+        </h1>
+        
+        {/* Bookshelf */}
+        <div className="relative">
+          {Object.entries(mockBooks).map(([category, books]) => (
+            <Shelf
+              key={category}
+              name={category}
+              books={books}
+              onBookSelect={setSelectedBook}
+              selectedBook={selectedBook}
+            />
+          ))}
+        </div>
+        
+        {/* Selected book display */}
+        {selectedBook && (
+          <div className="mt-12 p-8 bg-neutral-900 rounded-lg shadow-2xl border border-gray-800">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl text-gray-300 font-light tracking-wider">
+                  {selectedBook.title}
+                </h2>
+                <p className="text-gray-500 mt-2 text-sm">{selectedBook.author}</p>
+              </div>
+              <div className="flex gap-4">
+                <button className="flex items-center gap-2 px-6 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors">
+                  <BookOpen className="w-4 h-4" />
+                  <span className="text-sm tracking-wider">Read</span>
+                </button>
+                {selectedBook.hasAudio && (
+                  <button className="flex items-center gap-2 px-6 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors">
+                    <Headphones className="w-4 h-4" />
+                    <span className="text-sm tracking-wider">Listen</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default InteractiveLibrary;

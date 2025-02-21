@@ -1,0 +1,79 @@
+We need to implement several key enhancements to the current document viewer component:
+
+Typography & Layout
+
+
+Replace current header with OpenType-enabled Old English font, potentially using font-feature-settings for proper ligatures
+Implement proper kerning and tracking for the letterforms to prevent text collision
+Scale down the "Biliola Lead" subheader while maintaining proper text hierarchy
+Ensure proper vertical rhythm throughout the document
+
+
+QR Code Integration
+
+
+Current QR code implementation is non-functional - needs complete refactor
+Consider using a library like qrcode.js with error correction level H
+Implement proper viewport scaling for QR resolution
+
+
+Interactive Features
+
+
+Implement text hover states using CSS custom properties for color transitions
+Add word-level event delegation for performance optimization
+Create a magnification system using either:
+
+CSS transform scale with proper positioning calculations, or
+Canvas-based magnification for better performance with large documents
+
+
+Target magnification range: 1000-1500% with smooth scaling
+
+
+Accessibility Enhancements
+
+
+Implement ARIA 1.2 compliant controls
+Add keyboard navigation support
+Ensure screen reader compatibility with proper heading structure
+Support high contrast mode via prefers-contrast media query
+
+
+Settings System
+
+
+Create a context-based settings management system
+Implement persistent storage for user preferences
+Features to include:
+javascriptCopy{
+  magnification: {
+    enabled: boolean,
+    level: number, // 10-15x
+    smoothing: boolean
+  },
+  appearance: {
+    theme: string,
+    pageColor: string,
+    textHighlight: {
+      enabled: boolean,
+      color: string,
+      transition: string
+    }
+  },
+  typography: {
+    baseSize: number,
+    scaling: number,
+    kerning: boolean
+  }
+}
+
+
+
+Performance Considerations
+
+
+Implement virtual scrolling for large documents
+Use CSS containment for better paint performance
+Consider using IntersectionObserver for lazy loading of complex text effects
+Implement debouncing for magnification calculations

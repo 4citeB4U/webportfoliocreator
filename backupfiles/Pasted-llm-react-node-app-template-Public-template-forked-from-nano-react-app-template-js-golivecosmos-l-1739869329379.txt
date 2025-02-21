@@ -1,0 +1,128 @@
+llm-react-node-app-template
+Public template
+forked from nano-react-app/template-js
+golivecosmos/llm-react-node-app-template
+Go to file
+t
+This branch is 57 commits ahead of, 2 commits behind nano-react-app/template-js:master.
+Name		
+correa-brian
+correa-brian
+Merge pull request #8 from golivecosmos/fix-vector-db
+54618c2
+ · 
+2 years ago
+client
+feedback
+2 years ago
+examples
+memory examples + working document QA
+2 years ago
+server
+dont init twice
+2 years ago
+.SAMPLE_env
+remove quotes from sample env values
+2 years ago
+.gitignore
+display response from llm
+2 years ago
+LICENSE
+Initial commit
+6 years ago
+README.md
+Update README.md
+2 years ago
+index.html
+update path
+2 years ago
+package.json
+updates
+2 years ago
+yarn.lock
+updates
+2 years ago
+Repository files navigation
+README
+MIT license
+LLM React App Javascript Template 🪐
+License Cosmos Cosmos
+
+What is this template?
+This template is an example project for a simple Large Language Model (LLM) application built on top of React and Node. This template was built on top of the React template app from nano-react-app and updated with a Node server that uses HuggingFace.js and LangChain.js to connect to supported large language models. Use this template to easily build and run an LLM app, like the screenshot below:
+
+screenshot of LLM react app
+
+Getting Started
+To get started, follow the below steps:
+
+Create an .env file by copying the SAMPLE_env file and add the model store provider you'll be using (e.g. HUGGING_FACE or OPEN_AI) and the API keys for the models you are going to use
+
+Install packages
+
+Run the backend server that will start with a default port of 3100
+
+    yarn start-server
+Run the frontend server that will start with a default port of 5173.
+
+   yarn start
+Note: You can use the -p flag to specify a port for the frontend server. To do this, you can either run yarn start with an additional flag, like so:
+
+    yarn start -- --port 3000
+Or, edit the start script directly:
+
+vite --port 3000
+Additional scripts are provided to prepare the app for production
+
+yarn build — This will output a production build of the frontend app in the dist directory.
+yarn preview — This will run the production build of the frontend app locally with a default port of 5173 (note: this will not work if you haven't generated the production build yet).
+Tutorials
+👽 Looking for more content? Check out our tutorials on running LLM apps 📚
+
+How to Contribute
+Feel free to try out the template and open any issues if there's something you'd like to see added or fixed, or open a pull request to contribute.
+
+Shout out to the ⭐star gazers⭐
+Stargazers repo roster for @golivecosmos/llm-react-node-app-template
+
+Thanks for the forks🍴
+Forkers repo roster for @golivecosmos/llm-react-node-app-template
+
+About
+The Javascript template for an LLM react node app.
+
+Topics
+koa reactjs openai node-js vite llm langchain-js
+Resources
+ Readme
+License
+ MIT license
+ Activity
+ Custom properties
+Stars
+ 83 stars
+Watchers
+ 1 watching
+Forks
+ 14 forks
+Report repository
+Releases 5
+v0.0.5
+Latest
+on Jun 1, 2023
++ 4 releases
+Packages
+No packages published
+Languages
+JavaScript
+98.4%
+ 
+HTML
+1.6%
+Footer
+© 2025 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status

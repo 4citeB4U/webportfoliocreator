@@ -1,0 +1,33 @@
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
+
+export function PDANavbar() {
+  return (
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center px-4 max-w-7xl mx-auto">
+        <div className="flex flex-1 items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link href="/" className="font-bold text-xl text-primary">
+              Pro Driver Academy
+            </Link>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <Link href="/">
+              <Button variant="ghost" size="sm">
+                Home
+              </Button>
+            </Link>
+            <Link href="/admin">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Admin Portal
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+}

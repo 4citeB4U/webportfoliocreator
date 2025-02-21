@@ -1,0 +1,196 @@
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { useSpeech } from '@/hooks/use-speech';
+import { AlertCircle, Play, Pause, VolumeX } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+interface VoiceSelectorProps {
+  text: string;
+  selectedVoice: string;
+  onVoiceChange: (voice: string) => void;
+  onPlaybackStateChange?: (isPlaying: boolean) => void;
+  onPageComplete?: () => void;
+  className?: string;
+  autoPlay?: boolean;
+  onAutoPlayChange?: (autoPlay: boolean) => void;
+}
+
+export const VoiceSelector = forwardRef<any, VoiceSelectorProps>(({ 
+  text,
+  selectedVoice,
+  onVoiceChange,
+  onPlaybackStateChange,
+  onPageComplete,
+  className = '',
+  autoPlay = false,
+  onAutoPlayChange
+}, ref) => {
+  const { speak, stop, resume, pause, isSpeaking, isPaused, currentVoice, setVoice, availableVoices, isSupported } = useSpeech();
+  const [error, setError] = useState<string | null>(null);
+  const [lastText, setLastText] = useState(text);
+
+  useImperativeHandle(ref, () => ({
+    startSpeaking: () => handlePlayback(),
+    stopSpeaking: () => stop()
+  }));
+
+  useEffect(() => {
+    const voice = availableVoices.find(v => v.voiceURI === selectedVoice);
+    if (voice) {
+      setVoice(voice);
+    }
+  }, [selectedVoice, availableVoices, setVoice]);
+
+  useEffect(() => {
+    if (onPlaybackStateChange) {
+      onPlaybackStateChange(isSpeaking);
+    }
+  }, [isSpeaking, onPlaybackStateChange]);
+
+  useEffect(() => {
+    if (text !== lastText) {
+      if (isSpeaking) {
+        stop();
+      }
+      setLastText(text);
+      if (autoPlay && text) {
+        // Small delay to ensure the stop completes
+        setTimeout(() => {
+          handlePlayback();
+        }, 100);
+      }
+    }
+  }, [text, lastText, stop, isSpeaking, autoPlay]);
+
+  const handleVoiceChange = (voiceURI: string) => {
+    setError(null);
+    const voice = availableVoices.find(v => v.voiceURI === voiceURI);
+    if (voice) {
+      setVoice(voice);
+      onVoiceChange(voiceURI);
+    }
+  };
+
+  const handlePlayback = () => {
+    setError(null);
+    try {
+      if (isSpeaking && !isPaused) {
+        pause();
+        if (onAutoPlayChange) {
+          onAutoPlayChange(false);
+        }
+      } else if (isPaused) {
+        resume();
+        if (onAutoPlayChange) {
+          onAutoPlayChange(true);
+        }
+      } else {
+        if (!text || !text.trim()) {
+          setError("No text available to read");
+          return;
+        }
+        const speechEndHandler = () => {
+          if (onPageComplete) {
+            onPageComplete();
+          }
+          if (onAutoPlayChange) {
+            onAutoPlayChange(false);
+          }
+        };
+        speak(text, speechEndHandler);
+        if (onAutoPlayChange) {
+          onAutoPlayChange(true);
+        }
+      }
+    } catch (err) {
+      setError("Failed to start speech synthesis");
+      console.error("Speech synthesis error:", err);
+      if (onAutoPlayChange) {
+        onAutoPlayChange(false);
+      }
+    }
+  };
+
+  if (!isSupported) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Text-to-speech is not supported in your browser.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <div className={`space-y-2 ${className}`}>
+      {error && (
+        <Alert variant="destructive" className="mb-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <div className="flex items-center gap-2">
+        <Select
+          value={currentVoice?.voiceURI}
+          onValueChange={handleVoiceChange}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Select a voice">
+              {currentVoice?.name || "Select a voice"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {availableVoices.map((voice) => (
+              <SelectItem 
+                key={voice.voiceURI} 
+                value={voice.voiceURI}
+              >
+                {voice.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={handlePlayback}
+          className={isSpeaking ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}
+        >
+          {isSpeaking && !isPaused ? (
+            <Pause className="h-4 w-4" />
+          ) : (
+            <Play className="h-4 w-4" />
+          )}
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => {
+            stop();
+            if (onAutoPlayChange) {
+              onAutoPlayChange(false);
+            }
+          }}
+          disabled={!isSpeaking}
+          className="hover:bg-destructive/10"
+        >
+          <VolumeX className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+});
+
+VoiceSelector.displayName = 'VoiceSelector';
+
+export default VoiceSelector;

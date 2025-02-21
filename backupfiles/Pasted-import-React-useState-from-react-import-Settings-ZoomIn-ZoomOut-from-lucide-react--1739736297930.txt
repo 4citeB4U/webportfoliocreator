@@ -1,0 +1,130 @@
+import React, { useState } from 'react';
+import { Settings, ZoomIn, ZoomOut } from 'lucide-react';
+
+const EnhancedDocument = () => {
+  const [settings, setSettings] = useState({
+    fontSize: 16,
+    pageColor: '#ffffff',
+    magnifierEnabled: false,
+    magnification: 1.5
+  });
+  
+  const [hoveredWord, setHoveredWord] = useState(null);
+  
+  // Split text into words for individual hover effects
+  const titleText = "Certificate of Achievement";
+  const subtitle = "Biliola Lead";
+  const mainContent = "Leo de Lee";
+  
+  const titleWords = titleText.split(' ').map((word, index) => (
+    <span
+      key={`title-${index}`}
+      className={`
+        inline-block mx-1 font-serif
+        ${hoveredWord === `title-${index}` ? 'text-blue-500 transition-colors duration-300' : ''}
+      `}
+      style={{
+        fontSize: `${settings.fontSize * 1.5}px`,
+        fontFamily: 'Old English Text MT, serif'
+      }}
+      onMouseEnter={() => setHoveredWord(`title-${index}`)}
+      onMouseLeave={() => setHoveredWord(null)}
+    >
+      {word}
+    </span>
+  ));
+
+  const subtitleWords = subtitle.split(' ').map((word, index) => (
+    <span
+      key={`subtitle-${index}`}
+      className={`
+        inline-block mx-1
+        ${hoveredWord === `subtitle-${index}` ? 'text-blue-500 transition-colors duration-300' : ''}
+      `}
+      style={{ fontSize: `${settings.fontSize * 0.8}px` }}
+      onMouseEnter={() => setHoveredWord(`subtitle-${index}`)}
+      onMouseLeave={() => setHoveredWord(null)}
+    >
+      {word}
+    </span>
+  ));
+
+  const mainWords = mainContent.split(' ').map((word, index) => (
+    <span
+      key={`main-${index}`}
+      className={`
+        inline-block mx-1
+        ${hoveredWord === `main-${index}` ? 'text-blue-500 transition-colors duration-300' : ''}
+      `}
+      style={{ fontSize: `${settings.fontSize}px` }}
+      onMouseEnter={() => setHoveredWord(`main-${index}`)}
+      onMouseLeave={() => setHoveredWord(null)}
+    >
+      {word}
+    </span>
+  ));
+
+  const toggleMagnifier = () => {
+    setSettings(prev => ({
+      ...prev,
+      magnifierEnabled: !prev.magnifierEnabled
+    }));
+  };
+
+  const adjustFontSize = (increment) => {
+    setSettings(prev => ({
+      ...prev,
+      fontSize: Math.max(12, Math.min(48, prev.fontSize + increment))
+    }));
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-8 rounded-lg shadow-xl" style={{ backgroundColor: settings.pageColor }}>
+      {/* Settings Panel */}
+      <div className="mb-6 p-4 bg-gray-100 rounded-lg flex items-center gap-4">
+        <button
+          onClick={() => toggleMagnifier()}
+          className="p-2 rounded-full hover:bg-gray-200"
+          aria-label="Toggle Magnifier"
+        >
+          {settings.magnifierEnabled ? <ZoomOut /> : <ZoomIn />}
+        </button>
+        
+        <button
+          onClick={() => adjustFontSize(2)}
+          className="p-2 rounded-full hover:bg-gray-200"
+          aria-label="Increase Font Size"
+        >
+          <ZoomIn />
+        </button>
+        
+        <button
+          onClick={() => adjustFontSize(-2)}
+          className="p-2 rounded-full hover:bg-gray-200"
+          aria-label="Decrease Font Size"
+        >
+          <ZoomOut />
+        </button>
+        
+        <select
+          value={settings.pageColor}
+          onChange={(e) => setSettings(prev => ({ ...prev, pageColor: e.target.value }))}
+          className="p-2 rounded border"
+        >
+          <option value="#ffffff">White</option>
+          <option value="#f4f4f4">Light Gray</option>
+          <option value="#fdf6e3">Sepia</option>
+        </select>
+      </div>
+
+      {/* Document Content */}
+      <div className="text-center space-y-8">
+        <h1 className="mb-4">{titleWords}</h1>
+        <div className="text-gray-600">{subtitleWords}</div>
+        <div className="mt-8 text-xl">{mainWords}</div>
+      </div>
+    </div>
+  );
+};
+
+export default EnhancedDocument;

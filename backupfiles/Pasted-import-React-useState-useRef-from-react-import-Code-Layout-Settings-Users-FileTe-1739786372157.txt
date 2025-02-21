@@ -1,0 +1,375 @@
+import React, { useState, useRef } from 'react';
+import {
+  Code, Layout, Settings, Users, FileText, Box,
+  Play, Database, Clock, Bot, Palette, Move,
+  Layers, Wrench, Copy, Wand2, ChevronDown
+} from 'lucide-react';
+
+const MENU_ITEMS = {
+  projects: {
+    'Active Projects': [
+      'Project Alpha',
+      'E-commerce Site',
+      'Portfolio Builder',
+      'Dashboard App'
+    ],
+    'Templates': [
+      'Landing Page',
+      'Admin Dashboard',
+      'E-commerce Store',
+      'Portfolio Site'
+    ],
+    'Create New': [],
+    'Archive': [
+      'Completed Projects',
+      'Saved Drafts'
+    ]
+  },
+  components: {
+    'Button': [
+      'Primary Button',
+      'Secondary Button',
+      'Icon Button',
+      'Action Button'
+    ],
+    'Input': [
+      'Text Input',
+      'Number Input',
+      'Search Input',
+      'File Upload'
+    ],
+    'Card': [
+      'Basic Card',
+      'Profile Card',
+      'Product Card',
+      'Stats Card'
+    ],
+    'Background': [
+      'Gradient',
+      'Pattern',
+      'Image',
+      'Video'
+    ],
+    'Framework': [
+      'React Components',
+      'Vue Components',
+      'Angular Modules',
+      'Web Components'
+    ]
+  },
+  templates: {
+    'Saved Templates': [
+      'My Templates',
+      'Team Templates',
+      'Shared Templates'
+    ],
+    'Public Templates': [
+      'Popular',
+      'Featured',
+      'New Releases'
+    ],
+    'Export Template': [],
+    'Import Template': []
+  },
+  models: [
+    'Data Models',
+    'API Endpoints',
+    'Database Schema',
+    'Migrations'
+  ],
+  deploy: [
+    'Quick Deploy',
+    'Deployment History',
+    'Settings',
+    'Logs'
+  ],
+  time: [
+    'Time Tracker',
+    'Reports',
+    'Invoicing',
+    'Settings'
+  ]
+};
+
+const WPDDashboard = () => {
+  const [activeSection, setActiveSection] = useState('dashboard');
+  const [draggingComponent, setDraggingComponent] = useState(null);
+  const [showAIPanel, setShowAIPanel] = useState(false);
+  const [openMenu, setOpenMenu] = useState(null);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(256);
+  const [rightPanelWidth, setRightPanelWidth] = useState(320);
+
+  const leftResizeRef = useRef(null);
+  const rightResizeRef = useRef(null);
+
+  const handleResize = (e, side) => {
+    if (side === 'left') {
+      const newWidth = Math.max(200, Math.min(400, e.clientX));
+      setLeftPanelWidth(newWidth);
+    } else {
+      const newWidth = Math.max(200, Math.min(400, window.innerWidth - e.clientX));
+      setRightPanelWidth(newWidth);
+    }
+  };
+
+  const [activeSubmenu, setActiveSubmenu] = useState(null);
+
+  const NavigationButton = ({ icon: Icon, label, section }) => (
+    <div className="relative">
+      <button
+        onClick={() => setOpenMenu(openMenu === section ? null : section)}
+        className="flex items-center justify-between w-full p-3 rounded
+                 bg-slate-800/50 hover:bg-slate-700/50 transition-all
+                 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]
+                 text-cyan-100 hover:text-cyan-50 group"
+      >
+        <div className="flex items-center gap-3">
+          <Icon className="w-5 h-5 text-cyan-400 group-hover:text-cyan-300" />
+          <span className="font-medium">{label}</span>
+        </div>
+        <ChevronDown
+          className={`w-4 h-4 transition-transform ${openMenu === section ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {openMenu === section && (
+        <div className="absolute left-0 right-0 mt-2 py-2 bg-slate-800 rounded-lg
+                      border border-cyan-500/20 shadow-[0_5px_15px_rgba(6,182,212,0.25)]
+                      backdrop-blur-sm z-10">
+          {Object.entries(MENU_ITEMS[section]).map(([item, subItems], index) => (
+            <div key={index} className="relative">
+              <button
+                onClick={() => setActiveSubmenu(activeSubmenu === item ? null : item)}
+                className="w-full px-4 py-2 text-left text-slate-300 hover:text-cyan-300
+                         hover:bg-slate-700/50 transition-colors flex items-center justify-between"
+              >
+                {item}
+                {subItems.length > 0 && (
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform ${activeSubmenu === item ? 'rotate-180' : ''}`}
+                  />
+                )}
+              </button>
+
+              {activeSubmenu === item && subItems.length > 0 && (
+                <div className="ml-4 border-l border-cyan-500/20 pl-4">
+                  {subItems.map((subItem, subIndex) => (
+                    <button
+                      key={subIndex}
+                      className="w-full px-4 py-2 text-left text-slate-400 hover:text-cyan-300
+                               hover:bg-slate-700/50 transition-colors text-sm"
+                    >
+                      {subItem}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const LeftPanel = () => (
+    <>
+      <div
+        className="bg-slate-900/90 backdrop-blur-md h-screen p-6 flex flex-col"
+        style={{ width: leftPanelWidth }}
+      >
+        <h1 className="text-xl font-semibold text-cyan-100 mb-8 px-3">
+          Developer Toolkit
+        </h1>
+
+        <nav className="space-y-3 flex-grow">
+          <NavigationButton icon={Box} label="Projects" section="projects" />
+          <NavigationButton icon={Layers} label="Components" section="components" />
+          <NavigationButton icon={Copy} label="Templates" section="templates" />
+          <NavigationButton icon={Database} label="Models" section="models" />
+          <NavigationButton icon={Play} label="Deploy" section="deploy" />
+          <NavigationButton icon={Clock} label="Time" section="time" />
+        </nav>
+
+        <div className="space-y-3 pt-4 border-t border-slate-700/50">
+          <button
+            onClick={() => setShowAIPanel(!showAIPanel)}
+            className="flex items-center gap-3 w-full p-3 rounded
+                     bg-emerald-500/10 hover:bg-emerald-500/20 transition-all
+                     border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]
+                     text-emerald-200"
+          >
+            <Bot className="w-5 h-5" />
+            AI Assistant
+          </button>
+          <NavigationButton icon={Settings} label="Settings" section="settings" />
+        </div>
+      </div>
+      <div
+        ref={leftResizeRef}
+        className="w-1 h-screen cursor-col-resize bg-cyan-500/20 hover:bg-cyan-400/40 transition-colors"
+        onMouseDown={(e) => {
+          const handleMouseMove = (e) => handleResize(e, 'left');
+          const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          };
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+        }}
+      />
+    </>
+  );
+
+  const RightPanel = () => (
+    <>
+      <div
+        ref={rightResizeRef}
+        className="w-1 h-screen cursor-col-resize bg-cyan-500/20 hover:bg-cyan-400/40 transition-colors"
+        onMouseDown={(e) => {
+          const handleMouseMove = (e) => handleResize(e, 'right');
+          const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          };
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+        }}
+      />
+      <div
+        className="bg-slate-900/90 backdrop-blur-md h-screen p-6 overflow-y-auto"
+        style={{ width: rightPanelWidth }}
+      >
+        <h2 className="text-lg font-medium text-cyan-100 mb-6">Tools</h2>
+
+        <div className="space-y-8">
+          <div className="p-4 rounded-lg bg-slate-800/50 border border-cyan-500/20
+                        shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+            <h3 className="text-sm font-medium text-cyan-300 mb-4">Color Palette</h3>
+            <div className="grid grid-cols-4 gap-2">
+              {['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFFFFF', '#000000'].map(color => (
+                <button
+                  key={color}
+                  className="w-12 h-12 rounded-lg cursor-pointer transition-all
+                           hover:scale-110 shadow-[0_0_10px_rgba(6,182,212,0.25)]"
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-lg bg-slate-800/50 border border-cyan-500/20
+                        shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+            <h3 className="text-sm font-medium text-cyan-300 mb-4">Components</h3>
+            <div className="space-y-3">
+              {Object.entries(MENU_ITEMS.components).map(([componentName, subItems]) => (
+                <div key={componentName} className="relative">
+                  <button
+                    onClick={() => setActiveSubmenu(activeSubmenu === componentName ? null : componentName)}
+                    className="w-full p-3 bg-slate-700/50 rounded-lg
+                             hover:bg-slate-600/50 transition-all
+                             border border-cyan-500/20
+                             text-cyan-100 flex items-center justify-between"
+                    draggable
+                    onDragStart={() => setDraggingComponent(componentName)}
+                    onDragEnd={() => setDraggingComponent(null)}
+                  >
+                    <span>{componentName}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${activeSubmenu === componentName ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+
+                  {activeSubmenu === componentName && (
+                    <div className="absolute left-0 right-0 mt-2 py-2 bg-slate-800 rounded-lg
+                                  border border-cyan-500/20 shadow-[0_5px_15px_rgba(6,182,212,0.25)]
+                                  backdrop-blur-sm z-20">
+                      {subItems.map((subItem, index) => (
+                        <button
+                          key={index}
+                          className="w-full px-4 py-2 text-left text-slate-300 hover:text-cyan-300
+                                   hover:bg-slate-700/50 transition-colors text-sm"
+                          draggable
+                          onDragStart={() => setDraggingComponent(subItem)}
+                          onDragEnd={() => setDraggingComponent(null)}
+                        >
+                          {subItem}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="flex h-screen bg-slate-800">
+      <LeftPanel />
+
+      <div className="flex-1 bg-slate-800 p-6">
+        <div className="bg-slate-900/90 rounded-lg h-full p-4
+                      border-2 border-dashed border-cyan-500/20
+                      shadow-[0_0_30px_rgba(6,182,212,0.15)]">
+          <div className="flex items-center justify-center h-full">
+            {draggingComponent ? (
+              <div className="text-cyan-300">Drop component here</div>
+            ) : (
+              <div className="text-center text-slate-400">
+                <Move className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>Drag components here to build your interface</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <RightPanel />
+
+      {showAIPanel && (
+        <div className="absolute bottom-4 left-72 w-96 p-4
+                      bg-slate-900/90 backdrop-blur-md rounded-lg
+                      border border-emerald-500/20
+                      shadow-[0_5px_25px_rgba(16,185,129,0.25)]">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-emerald-400 font-medium flex items-center gap-2">
+              <Bot className="w-5 h-5" />
+              AI Assistant
+            </h3>
+            <button
+              onClick={() => setShowAIPanel(false)}
+              className="text-slate-400 hover:text-slate-300"
+            >
+              Close
+            </button>
+          </div>
+          <div className="bg-slate-800/50 rounded-lg p-3 mb-4
+                        border border-emerald-500/10">
+            <p className="text-emerald-100 text-sm">How can I assist with your development?</p>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Ask me anything..."
+              className="flex-1 bg-slate-800/50 rounded-lg px-3 py-2
+                       text-slate-300 text-sm
+                       border border-emerald-500/20
+                       focus:outline-none focus:ring-2 focus:ring-emerald-500/50
+                       placeholder-slate-500"
+            />
+            <button className="px-4 py-2 bg-emerald-600/90 text-white rounded-lg
+                           hover:bg-emerald-500/90 transition-colors text-sm
+                           shadow-[0_0_10px_rgba(16,185,129,0.25)]">
+              Ask
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default RWDDashboard;

@@ -1,0 +1,527 @@
+/* Add these styles at the top of the file */
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap');
+
+/* Page content styles */
+.page-content {
+  height: calc(100vh - 12rem);
+  margin-top: 4rem;
+  font-family: "Libre Baskerville", "Baskerville", serif;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  text-align: justify;
+  overflow: hidden;
+  color: #2A2A2A;
+  padding: 2rem 3rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.book-container {
+  width: 90vw;
+  max-width: 1200px;
+  height: 80vh;
+  margin: 2rem auto;
+  perspective: 2000px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-spread {
+  width: 100%;
+  max-width: 1600px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  gap: 0;
+}
+
+.page-left, .page-right {
+  flex: 1;
+  height: 100%;
+  width: 50%;
+  max-width: 50%;
+  background: rgba(255, 254, 240, 0.98);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.page-left {
+  border-radius: 10px 0 0 10px;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.page-right {
+  border-radius: 0 10px 10px 0;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Voice settings button - aligned with gift button */
+.voice-settings-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 8rem; /* Aligned with gift button */
+  width: 3.5rem;
+  height: 3.5rem;
+  background: rgba(34, 197, 94, 0.2);
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  border-radius: 9999px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+/* Voice settings dropdown with improved visibility */
+.voice-settings-dropdown {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+  min-width: 250px;
+  background: rgba(34, 197, 94, 0.95);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  color: white;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.voice-settings-dropdown h3 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: white;
+}
+
+.voice-settings-dropdown button {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 0.5rem;
+}
+
+.voice-settings-dropdown button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+}
+
+.voice-settings-dropdown button.selected {
+  background: rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+}
+
+.voice-settings-dropdown .voice-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.voice-settings-dropdown .voice-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.voice-settings-dropdown .voice-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.voice-settings-dropdown .voice-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.voice-settings-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* Dedication specific styles */
+.dedication-content {
+  text-align: center;
+  padding: 1rem;
+}
+
+.dedication-text {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 1.2rem;
+  text-align: justify;
+}
+
+/* Book content styles */
+.book-paragraph {
+  text-indent: 2rem;
+  margin-bottom: 1.25rem;
+  text-align: justify;
+  padding-right: 1rem;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+}
+
+.section-title {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 2rem;
+  color: #2A2A2A;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+/* Running header styles */
+.running-header {
+  position: absolute;
+  top: 1rem;
+  left: 3rem;
+  right: 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.running-header-title {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 1.25rem;
+  color: #2A2A2A;
+}
+
+.running-header-author {
+  font-family: "Libre Baskerville", serif;
+  font-size: 1rem;
+  color: #2A2A2A;
+  font-style: italic;
+}
+
+/* Page numbers */
+.page-number {
+  position: absolute;
+  bottom: 2rem;
+  font-style: italic;
+  color: #2A2A2A;
+  font-weight: 400;
+  font-size: 0.875rem;
+  font-family: "Libre Baskerville", "Baskerville", serif;
+}
+
+.page-number.left {
+  right: 3rem;
+}
+
+.page-number.right {
+  left: 3rem;
+}
+
+/* Navigation buttons */
+.page-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4rem;
+  height: 4rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.page-nav-button:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.6);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.page-nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.page-nav-button.prev {
+  left: -2rem;
+}
+
+.page-nav-button.next {
+  right: -2rem;
+}
+
+.page-nav-button svg {
+  width: 2rem;
+  height: 2rem;
+  color: white;
+}
+
+/* Additional controls */
+.author-name {
+  position: fixed;
+  bottom: 2rem;
+  left: 0;
+  right: 0;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.author-text {
+  font-family: "Libre Baskerville", serif;
+  font-size: 2.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  position: relative;
+  z-index: 2;
+}
+
+.narration-button {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.narration-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.narration-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.narration-button svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+/* Index specific styles */
+.index-entry {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.index-description {
+  font-size: 0.78rem;
+  color: #666;
+  margin-left: 1.5rem;
+  margin-bottom: 0.4rem;
+  font-style: italic;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .book-container {
+    width: 95vw;
+    margin: 1rem auto;
+  }
+
+  .page-content {
+    padding: 2rem 2.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .book-container {
+    width: 100vw;
+    margin: 0;
+  }
+
+  .page-content {
+    padding: 1.5rem 2rem;
+    font-size: 0.75rem;
+  }
+}
+
+.support-author-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: rgba(34, 197, 94, 0.2);
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  border-radius: 9999px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.support-author-button:hover {
+  width: 16rem;
+  background: rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+}
+
+.support-author-button .support-button-text {
+  position: absolute;
+  left: 4rem;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.support-author-button:hover .support-button-text {
+  opacity: 1;
+}
+
+.particles-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.8;
+}
+
+.progress-indicator {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 4px;
+  width: 200px;
+  background: rgba(42, 42, 42, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #2A2A2A;
+  transition: width 0.3s ease;
+}
+
+.settings-panel {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  z-index: 100;
+}
+
+.settings-panel .slider-container {
+  width: 200px;
+}
+
+.page-content .book-paragraph {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+@media (prefers-contrast: high) {
+  .book-paragraph {
+    color: #000000;
+    background: #ffffff;
+  }
+
+  .section-title,
+  .running-header {
+    color: #000000;
+    border-color: #000000;
+  }
+}
+
+.book-content {
+  contain: content;
+}
+
+.page-content {
+  contain: layout style paint;
+}
+
+.purchase-button {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.purchase-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.book-paragraph {
+  text-indent: 2rem;
+  margin-bottom: 1.25rem;
+  break-inside: avoid;
+  color: #2A2A2A;
+  font-family: "Libre Baskerville", "Baskerville", serif;
+}
+
+.section-title,
+.running-header {
+  font-feature-settings: "liga" 1, "kern" 1, "hist" 1;
+  letter-spacing: 0.02em;
+}

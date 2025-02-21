@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Lee Interface</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .fire-text {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            font-size: 48px;
+            font-weight: bold;
+            z-index: 10;
+            color: #fff;
+            text-shadow: 0 0 20px #fefcc9,
+                         0 -10px 40px #feec85,
+                         0 -20px 50px #ffae34,
+                         0 -40px 80px #ec760c,
+                         0 0 90px #cd4606;
+            animation: flicker 4s linear infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { 
+                text-shadow: 0 0 20px #fefcc9,
+                            0 -10px 40px #feec85,
+                            0 -20px 50px #ffae34,
+                            0 -40px 80px #ec760c,
+                            0 0 90px #cd4606;
+            }
+            50% { 
+                text-shadow: 0 0 25px #fefcc9,
+                            0 -12px 45px #feec85,
+                            0 -25px 55px #ffae34,
+                            0 -45px 85px #ec760c,
+                            0 0 100px #cd4606;
+            }
+        }
+
+        .message-container {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            height: 50px;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .message-wrapper {
+            position: relative;
+            width: 80%;
+            height: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+            mask-image: linear-gradient(
+                to right,
+                transparent 0%,
+                black 25%,
+                black 75%,
+                transparent 100%
+            );
+            -webkit-mask-image: linear-gradient(
+                to right,
+                transparent 0%,
+                black 25%,
+                black 75%,
+                transparent 100%
+            );
+        }
+
+        .message {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            color: #0ff;
+            font-family: 'Arial', sans-serif;
+            font-size: 24px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 10px #0ff,
+                        0 0 20px #0ff,
+                        0 0 30px #0ff;
+            animation: scrollText 8s linear infinite;
+        }
+
+        @keyframes scrollText {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        canvas {
+            position: absolute;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Fire Text -->
+    <div class="fire-text">AGENT LEE</div>
+
+    <!-- Scrolling Message with Fade -->
+    <div class="message-container">
+        <div class="message-wrapper">
+            <div class="message">Hello, I am Agent Lee. How may I assist you today?</div>
+        </div>
+    </div>
+
+    <!-- Main Canvas -->
+    <canvas id="mainCanvas"></canvas>
+
+    <script>
+        // Add message cycling
+        const messages = [
+            "Hello, I am Agent Lee. How may I assist you today?",
+            "I'm here to help you with any questions.",
+            "Let me know what you need assistance with."
+        ];
+        
+        let currentMessage = 0;
+        const messageElement = document.querySelector('.message');
+
+        function cycleMessages() {
+            const newMessage = document.createElement('div');
+            newMessage.className = 'message';
+            newMessage.textContent = messages[(currentMessage + 1) % messages.length];
+            newMessage.style.animation = 'none'; // Reset animation
+            
+            const wrapper = document.querySelector('.message-wrapper');
+            wrapper.appendChild(newMessage);
+            
+            // Trigger reflow
+            newMessage.offsetHeight;
+            newMessage.style.animation = 'scrollText 8s linear';
+            
+            // Remove old message after animation
+            setTimeout(() => {
+                messageElement.remove();
+            }, 8000);
+            
+            currentMessage = (currentMessage + 1) % messages.length;
+            messageElement = newMessage;
+        }
+
+        // Start cycling after first message completes
+        setTimeout(() => {
+            setInterval(cycleMessages, 8000);
+        }, 8000);
+
+        // Previous vortex/core animation code here
+    </script>
+</body>
+</html>

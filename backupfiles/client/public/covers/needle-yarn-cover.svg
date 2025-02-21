@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="400" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="300" height="400" fill="#8B4513"/>
+  <rect x="10" y="10" width="280" height="380" fill="#DEB887" rx="5"/>
+  
+  <!-- Title -->
+  <text x="150" y="100" text-anchor="middle" fill="#4A2810" font-size="24" font-family="serif">
+    Needle &amp; Yarn
+  </text>
+  <text x="150" y="140" text-anchor="middle" fill="#4A2810" font-size="16" font-family="serif">
+    A Love Stitched in Time
+  </text>
+  
+  <!-- Decorative elements -->
+  <g transform="translate(150,250) scale(2)">
+    <text x="0" y="0" text-anchor="middle" font-size="24">🧶</text>
+    <text x="0" y="-30" text-anchor="middle" font-size="24">🪡</text>
+  </g>
+  
+  <!-- Author -->
+  <text x="150" y="350" text-anchor="middle" fill="#4A2810" font-size="14" font-family="serif">
+    By Leola (Sista) Lee
+  </text>
+</svg>

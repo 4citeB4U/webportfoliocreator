@@ -1,0 +1,352 @@
+import React from 'react';
+import { Layout, Code, Database, Globe, Users, Settings, Activity, Server, Box } from 'lucide-react';
+
+const LoadingDashboard = () => {
+  const canvasRef = React.useRef(null);
+  const [isForming, setIsForming] = React.useState(false);
+  const [isDashboardReady, setIsDashboardReady] = React.useState(false);
+  const [fadeOutFramework, setFadeOutFramework] = React.useState(false);
+  const backgroundParticlesRef = React.useRef([]);
+  const frameworkParticlesRef = React.useRef([]);
+  const animationFrameRef = React.useRef();
+
+  class BackgroundParticle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.size = Math.random() * 2.5 + 1.5;
+      this.baseSize = this.size;
+      this.speedX = (Math.random() - 0.5) * 1.5;
+      this.speedY = (Math.random() - 0.5) * 1.5;
+      this.angle = Math.random() * Math.PI * 2;
+      this.colors = [
+        '#FF00FF40',
+        '#00FFFF40',
+        '#FF2E9740',
+        '#3AF8FF40'
+      ];
+      this.color = this.colors[Math.floor(Math.random() * this.colors.length)];
+      this.glowStrength = Math.random() * 5 + 5;
+    }
+
+    update(canvas) {
+      this.x += this.speedX * 0.2;
+      this.y += this.speedY * 0.2;
+      
+      if (this.x < 0) this.x = canvas.width;
+      if (this.x > canvas.width) this.x = 0;
+      if (this.y < 0) this.y = canvas.height;
+      if (this.y > canvas.height) this.y = 0;
+      
+      this.angle += 0.02;
+      this.size = this.baseSize + Math.sin(this.angle) * 0.3;
+    }
+
+    draw(ctx) {
+      ctx.shadowBlur = this.glowStrength;
+      ctx.shadowColor = this.color.slice(0, 7);
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size * 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff20';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  class FrameworkParticle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.size = Math.random() * 2 + 1;
+      this.baseSize = this.size;
+      this.speedX = (Math.random() - 0.5) * 3;
+      this.speedY = (Math.random() - 0.5) * 3;
+      this.angle = Math.random() * Math.PI * 2;
+      this.targetX = x;
+      this.targetY = y;
+      this.attraction = false;
+      this.colors = [
+        '#FF00FF',
+        '#00FFFF',
+        '#FF2E97',
+        '#3AF8FF'
+      ];
+      this.color = this.colors[Math.floor(Math.random() * this.colors.length)];
+      this.opacity = 1;
+    }
+
+    update(canvas, isForming, fadeOut) {
+      if (fadeOut) {
+        this.opacity = Math.max(0, this.opacity - 0.02);
+      }
+
+      if (this.attraction && isForming) {
+        const dx = this.targetX - this.x;
+        const dy = this.targetY - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance > 1) {
+          this.x += dx * 0.05;
+          this.y += dy * 0.05;
+        }
+      } else {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+      }
+
+      this.angle += 0.02;
+      this.size = this.baseSize + Math.sin(this.angle) * 0.5;
+    }
+
+    draw(ctx) {
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color.slice(0, 7) + Math.floor(this.opacity * 255).toString(16).padStart(2, '0');
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  const generateDashboardPoints = (width, height) => {
+    const points = [];
+    const spacing = 20; // Reduced spacing for more dense coverage
+    const margin = 40;
+    
+    // Sidebar frame (left panel)
+    const sidebarWidth = 240;
+    for (let y = 0; y < height; y += spacing) {
+      points.push({ x: margin, y, delay: y });
+      points.push({ x: sidebarWidth, y, delay: y });
+    }
+    // Horizontal lines for sidebar
+    for (let x = margin; x <= sidebarWidth; x += spacing) {
+      points.push({ x, y: 0, delay: x });
+      points.push({ x, y: height, delay: x });
+    }
+
+    // Main content area grid
+    const contentStartX = sidebarWidth + margin;
+    const contentEndX = width - margin;
+    const contentStartY = margin;
+    const contentEndY = height - margin;
+
+    // Horizontal lines across full width
+    for (let y = contentStartY; y <= contentEndY; y += spacing) {
+      for (let x = contentStartX; x <= contentEndX; x += spacing) {
+        points.push({ x, y, delay: x + y });
+      }
+    }
+
+    // Vertical lines for content structure
+    for (let x = contentStartX; x <= contentEndX; x += spacing) {
+      for (let y = contentStartY; y <= contentEndY; y += spacing) {
+        points.push({ x, y, delay: x + y });
+      }
+    }
+
+    // Card outlines (3x3 grid)
+    const cardWidth = 280;
+    const cardHeight = 160;
+    const cardSpacing = 30;
+    const cardsStartX = contentStartX + margin;
+    const cardsStartY = contentStartY + 60; // Below header
+
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        const cardX = cardsStartX + (col * (cardWidth + cardSpacing));
+        const cardY = cardsStartY + (row * (cardHeight + cardSpacing));
+        
+        // Card perimeter with denser points
+        for (let x = 0; x <= cardWidth; x += spacing/2) {
+          points.push({ x: cardX + x, y: cardY, delay: (row * 3 + col) * 500 + x * 2 });
+          points.push({ x: cardX + x, y: cardY + cardHeight, delay: (row * 3 + col) * 500 + x * 2 });
+        }
+        for (let y = 0; y <= cardHeight; y += spacing/2) {
+          points.push({ x: cardX, y: cardY + y, delay: (row * 3 + col) * 500 + y * 2 });
+          points.push({ x: cardX + cardWidth, y: cardY + y, delay: (row * 3 + col) * 500 + y * 2 });
+        }
+      }
+    }
+
+    return points;
+  };
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Initialize particles
+    const backgroundParticleCount = 150;
+    const frameworkParticleCount = 800; // Increased for better coverage
+
+    for (let i = 0; i < backgroundParticleCount; i++) {
+      backgroundParticlesRef.current.push(
+        new BackgroundParticle(
+          Math.random() * canvas.width,
+          Math.random() * canvas.height
+        )
+      );
+    }
+
+    for (let i = 0; i < frameworkParticleCount; i++) {
+      frameworkParticlesRef.current.push(
+        new FrameworkParticle(
+          Math.random() * canvas.width,
+          Math.random() * canvas.height
+        )
+      );
+    }
+
+    // Animation setup
+    setTimeout(() => {
+      setIsForming(true);
+      const dashboardPoints = generateDashboardPoints(canvas.width, canvas.height);
+      
+      frameworkParticlesRef.current.forEach((particle, index) => {
+        const point = dashboardPoints[index % dashboardPoints.length];
+        setTimeout(() => {
+          particle.attraction = true;
+          particle.targetX = point.x;
+          particle.targetY = point.y;
+        }, point.delay);
+      });
+
+      setTimeout(() => {
+        setFadeOutFramework(true);
+        setTimeout(() => setIsDashboardReady(true), 3000);
+      }, 6000); // Increased time to allow full tracing
+    }, 2000);
+
+    const animate = () => {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      backgroundParticlesRef.current.forEach(particle => {
+        particle.update(canvas);
+        particle.draw(ctx);
+      });
+
+      frameworkParticlesRef.current.forEach(particle => {
+        particle.update(canvas, isForming, fadeOutFramework);
+        particle.draw(ctx);
+      });
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isForming, fadeOutFramework]);
+
+  const Dashboard = () => (
+    <div className="flex h-screen bg-black/50 backdrop-blur-sm">
+      <div className="w-60 bg-gray-900/50 backdrop-blur-sm p-4 text-gray-300 border-r border-cyan-500/20">
+        <div className="flex items-center mb-8">
+          <Globe className="w-6 h-6 mr-2 text-cyan-400" />
+          <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 text-transparent bg-clip-text">
+            WebDev Console
+          </h1>
+        </div>
+        
+        <nav className="space-y-4">
+          {[
+            { icon: Layout, text: "Dashboard", color: "cyan", desc: "Overview & Analytics" },
+            { icon: Code, text: "Development", color: "purple", desc: "Code & Repositories" },
+            { icon: Globe, text: "Deployment", color: "pink", desc: "CI/CD & Hosting" },
+            { icon: Database, text: "Backend", color: "blue", desc: "APIs & Databases" },
+            { icon: Box, text: "Frontend", color: "emerald", desc: "UI & Components" },
+            { icon: Activity, text: "Performance", color: "amber", desc: "Monitoring & Optimization" },
+            { icon: Server, text: "DevOps", color: "indigo", desc: "Infrastructure & Scaling" },
+            { icon: Settings, text: "Testing", color: "rose", desc: "QA & Security" }
+          ].map((item, index) => (
+            <button
+              key={index}
+              className={`flex flex-col w-full p-3 rounded 
+                hover:bg-${item.color}-500/10 
+                hover:shadow-lg 
+                hover:shadow-${item.color}-500/50 
+                hover:brightness-110 
+                border border-transparent 
+                hover:border-${item.color}-500/20 
+                transition-all duration-300
+                ${item.text === "Dashboard" ? `text-${item.color}-400 border-${item.color}-500/20` : ""}`}
+            >
+              <div className="flex items-center mb-1">
+                {React.createElement(item.icon, { className: "w-5 h-5 mr-3" })}
+                <span className="font-medium">{item.text}</span>
+              </div>
+              <span className="text-xs text-gray-400 ml-8">{item.desc}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      <div className="flex-1 p-8">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 text-transparent bg-clip-text">
+            Project Overview
+          </h2>
+          <div className="flex space-x-4">
+            <button className="px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded border border-cyan-500/40 hover:bg-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/20 backdrop-blur-sm transition-all duration-300">
+              New Project
+            </button>
+            <button className="p-2 bg-purple-500/20 text-purple-400 rounded border border-purple-500/40 hover:bg-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 backdrop-blur-sm transition-all duration-300">
+              <Settings className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6">
+          {[
+            { title: "Active Deployments", value: "24", icon: Globe, color: "cyan" },
+            { title: "Server Status", value: "99.9%", icon: Activity, color: "purple" },
+            { title: "Active Users", value: "1,234", icon: Users, color: "pink" }
+          ].map((card, index) => (
+            <div key={index} className={`bg-gray-900/50 backdrop-blur-sm p-6 rounded-lg border border-${card.color}-500/20 hover:border-${card.color}-500/40 transition-colors`}>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className={`text-${card.color}-400/80 text-sm`}>{card.title}</p>
+                  <h3 className={`text-2xl font-bold text-${card.color}-400 mt-1`}>{card.value}</h3>
+                </div>
+                <span className={`bg-${card.color}-500/20 p-2 rounded border border-${card.color}-500/40`}>
+                  {React.createElement(card.icon, { className: `w-6 h-6 text-${card.color}-400` })}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="relative w-full h-screen">
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 -z-10"
+      />
+      <div className={`absolute inset-0 ${isDashboardReady ? 'opacity-100' : 'opacity-0'} transition-opacity duration-1000`}>
+        {isDashboardReady && <Dashboard />}
+      </div>
+    </div>
+  );
+};
+
+export default LoadingDashboard;

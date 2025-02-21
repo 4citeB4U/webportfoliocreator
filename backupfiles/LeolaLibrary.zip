@@ -1,0 +1,741 @@
+client/src/pages/admin-page.lsx:
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Code, Layout, Settings, Users, FileText, Box,
+  Play, Database, Clock, Bot, Palette, Move,
+  Layers, Wrench, Copy, Wand2, ChevronDown, Home,
+  Loader2, Plus, X
+} from 'lucide-react';
+import { Link } from "wouter";
+import { AIAssistant } from "@/components/ai/AIAssistant";
+
+// Update project URL constants to match backend exactly
+const PROJECTS = {
+  'Pro Driver Academy': 'pro-driver-academy',
+  'Leola\'s Digital Library': 'leolas-library'
+} as const;
+
+// Menu items configuration update for Active Projects section
+const MENU_ITEMS = {
+  projects: {
+    'Active Projects': [
+      { name: 'Pro Driver Academy', url: '/projects/pro-driver-academy' },
+      { name: 'Leola\'s Digital Library', url: '/projects/leolas-library' }
+    ],
+    'Templates': [
+      'Particle Background Template',
+      'Digital Library Template',
+      'Portfolio Template',
+      'Landing Page Template'
+    ],
+    'Create New': [],
+    'Archive': [
+      'Completed Projects',
+      'Saved Drafts'
+    ]
+  },
+  components: {
+    'Layouts': [
+      'Digital Library Layout',
+      'Portfolio Layout',
+      'Landing Page Layout',
+      'Admin Dashboard Layout'
+    ],
+    'Interactive Elements': [
+      'Particle Background',
+      'QR Code Generator',
+      'Loading Animation',
+      'Floating Emojis'
+    ],
+    'Navigation': [
+      'Navbar With Blur',
+      'Sidebar Navigation',
+      'Bottom Navigation',
+      'Breadcrumbs'
+    ],
+    'Cards': [
+      'Book Card',
+      'Feature Card',
+      'Profile Card',
+      'Stats Card'
+    ],
+    'Backgrounds': [
+      'Animated Particles',
+      'Gradient Mesh',
+      'Blur Effect',
+      'Pattern Grid'
+    ],
+    'Framework Components': [
+      'React Components',
+      'Tailwind Templates',
+      'Shadcn Components',
+      'Animation Modules'
+    ]
+  },
+  templates: {
+    'Saved Templates': [
+      'My Templates',
+      'Team Templates',
+      'Shared Templates'
+    ],
+    'Public Templates': [
+      'Popular',
+      'Featured',
+      'New Releases'
+    ],
+    'Export Template': [],
+    'Import Template': []
+  },
+  models: [
+    'Data Models',
+    'API Endpoints',
+    'Database Schema',
+    'Migrations'
+  ],
+  deploy: [
+    'Quick Deploy',
+    'Deployment History',
+    'Settings',
+    'Logs'
+  ],
+  time: [
+    'Time Tracker',
+    'Reports',
+    'Invoicing',
+    'Settings'
+  ]
+};
+
+interface DragEvent extends React.DragEvent<HTMLDivElement> {
+  dataTransfer: DataTransfer;
+}
+
+interface NavigationButtonProps {
+  icon: React.ElementType;
+  label: string;
+  section: string;
+}
+
+
+export default function AdminPage() {
+  const [activeSection, setActiveSection] = useState<string>('dashboard');
+  const [draggingComponent, setDraggingComponent] = useState<string | null>(null);
+  const [showAIPanel, setShowAIPanel] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(256);
+  const [rightPanelWidth, setRightPanelWidth] = useState(320);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [projectUrl, setProjectUrl] = useState<string | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [highlightedRegion, setHighlightedRegion] = useState<number | null>(null);
+  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+
+  const previewRef = useRef<HTMLIFrameElement>(null);
+  const leftResizeRef = useRef<HTMLDivElement>(null);
+  const rightResizeRef = useRef<HTMLDivElement>(null);
+
+  const handleResize = (e: MouseEvent, side: 'left' | 'right') => {
+    if (side === 'left') {
+      const newWidth = Math.max(200, Math.min(400, e.clientX));
+      setLeftPanelWidth(newWidth);
+    } else {
+      const newWidth = Math.max(200, Math.min(400, window.innerWidth - e.clientX));
+      setRightPanelWidth(newWidth);
+    }
+  };
+
+  // Updated drag data handler for projects
+  const handleProjectDragStart = (projectData: { name: string; url: string }) => {
+    const id = projectData.url.split('/').pop() || '';
+    const dragData = {
+      id,
+      name: projectData.name,
+      url: projectData.url,
+      project: projectData.name // For backward compatibility
+    };
+    console.log('Starting drag with data:', dragData);
+    return JSON.stringify(dragData);
+  };
+
+  // Updated drop handler to use dragged website's id, name, and url
+  const handleProjectDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsPreviewLoading(true);
+    setPreviewError(null);
+
+    try {
+      const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+      console.log('Drop data received:', data);
+
+      if (data.project) {
+        console.log('Setting up preview for:', data.project);
+        setSelectedProject(data.project);
+
+        // Get the project slug and construct the preview URL
+        const projectSlug = PROJECTS[data.project as keyof typeof PROJECTS];
+        if (!projectSlug) {
+          throw new Error(`Invalid project selection: ${data.project}`);
+        }
+
+        // Construct and validate the preview URL
+        const previewUrl = `/projects/${projectSlug}`;
+        console.log('Setting preview URL:', previewUrl);
+
+        setProjectUrl(previewUrl);
+        setEditMode(true);
+
+        // Immediately try to load the preview
+        if (previewRef.current) {
+          previewRef.current.src = previewUrl;
+        }
+      } else {
+        throw new Error('No project data found in drop event');
+      }
+    } catch (error) {
+      console.error('Error processing drop:', error);
+      setPreviewError(`Failed to process drop: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
+  const handleComponentDrop = async (e: DragEvent, component: string | null) => {
+    e.preventDefault();
+    if (!editMode || !selectedProject || !component) return;
+
+    const region = highlightedRegion;
+    console.log('Dropping component:', component, 'onto region:', region);
+
+    // Create preview of the change
+    setIsPreviewLoading(true);
+
+    try {
+      // Apply changes without page reload
+      if (previewRef.current) {
+        const iframe = previewRef.current;
+        const iframeWindow = iframe.contentWindow;
+        if (iframeWindow) {
+          // Send message to iframe to update content
+          iframeWindow.postMessage({
+            type: 'PREVIEW_UPDATE',
+            component,
+            region,
+            projectId: selectedProject
+          }, '*');
+        }
+      }
+    } catch (error) {
+      console.error('Preview update error:', error);
+      setPreviewError('Failed to update preview. Please try again.');
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
+  const NavigationButton: React.FC<NavigationButtonProps> = ({ icon: Icon, label, section }) => {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setOpenMenu(openMenu === section ? null : section)}
+          className="flex items-center justify-between w-full p-3 rounded-md
+                   bg-background/80 hover:bg-muted/80 transition-all duration-300
+                   border border-primary/20 shadow-primary/25
+                   text-primary hover:text-primary-foreground group
+                   hover:shadow-[0_0_25px_rgba(6,182,212,0.35)]"
+        >
+          <div className="flex items-center gap-3">
+            <Icon className="w-5 h-5 text-primary group-hover:text-primary-foreground" />
+            <span className="font-medium">{label}</span>
+          </div>
+          <ChevronDown
+            className={`w-4 h-4 transition-transform duration-300 ${openMenu === section ? 'rotate-180' : ''}`}
+          />
+        </button>
+
+        {openMenu === section && MENU_ITEMS[section as keyof typeof MENU_ITEMS] && (
+          <div className="absolute left-0 right-0 mt-2 py-2 bg-background/95 rounded-md
+                        border border-primary/20 shadow-[0_5px_25px_rgba(6,182,212,0.35)]
+                        backdrop-blur-md z-10">
+            {Object.entries(MENU_ITEMS[section as keyof MENU_ITEMS]).map(([item, subItems], index) => (
+              <div key={index} className="relative">
+                <button
+                  onClick={() => setActiveSubmenu(activeSubmenu === item ? null : item)}
+                  className="w-full px-4 py-2 text-left text-primary hover:text-primary-foreground
+                           hover:bg-muted/50 transition-all duration-300 flex items-center justify-between"
+                >
+                  {item}
+                  {Array.isArray(subItems) && subItems.length > 0 && (
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform duration-300 ${activeSubmenu === item ? 'rotate-180' : ''}`}
+                    />
+                  )}
+                </button>
+
+                {activeSubmenu === item && Array.isArray(subItems) && subItems.length > 0 && (
+                  <div className="ml-4 border-l border-primary/20 pl-4">
+                    {subItems.map((subItem, subIndex) => {
+                      // Handle both object and string items
+                      const projectData = typeof subItem === 'object'
+                        ? subItem
+                        : { name: subItem, url: `/projects/${PROJECTS[subItem as keyof typeof PROJECTS]}` };
+
+                      return (
+                        <div
+                          key={subIndex}
+                          className="w-full px-4 py-2 text-primary/80 hover:text-primary-foreground
+                                   hover:bg-muted/50 transition-all duration-300 text-sm
+                                   hover:shadow-[0_0_15px_rgba(6,182,212,0.25)]
+                                   cursor-move"
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData(
+                              'text/plain',
+                              handleProjectDragStart(projectData)
+                            );
+                            setDraggingComponent(projectData.name);
+                          }}
+                          onDragEnd={() => {
+                            setDraggingComponent(null);
+                          }}
+                        >
+                          {projectData.name}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex h-screen bg-background">
+      {/* Left Panel */}
+      <div
+        className="bg-background/95 backdrop-blur-md h-screen p-6 flex flex-col
+                   border-r border-primary/20"
+        style={{ width: leftPanelWidth }}
+      >
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-xl font-semibold text-primary px-3
+                      [text-shadow:_0_0_10px_rgba(6,182,212,0.5)]">
+            Developer Toolkit
+          </h1>
+          <Link href="/showcase">
+            <button className="p-2 rounded-md hover:bg-primary/10 transition-colors
+                           text-primary hover:text-primary-foreground
+                           border border-primary/20 shadow-[0_0_15px_rgba(6,182,212,0.25)]
+                           hover:shadow-[0_0_25px_rgba(6,182,212,0.35)]" title="Return to Showcase">
+              <Home className="w-5 h-5" />
+            </button>
+          </Link>
+        </div>
+
+        <nav className="space-y-3 flex-grow">
+          <NavigationButton icon={Box} label="Projects" section="projects" />
+          <NavigationButton icon={Layers} label="Components" section="components" />
+          <NavigationButton icon={Copy} label="Templates" section="templates" />
+          <NavigationButton icon={Database} label="Models" section="models" />
+          <NavigationButton icon={Play} label="Deploy" section="deploy" />
+          <NavigationButton icon={Clock} label="Time" section="time" />
+        </nav>
+
+        <div className="space-y-3 pt-4 border-t border-primary/20">
+          <button
+            onClick={() => setShowAIPanel(!showAIPanel)}
+            className="flex items-center gap-3 w-full p-3 rounded-md
+                     bg-accent hover:bg-accent/90 transition-all duration-300
+                     border border-accent shadow-[0_0_15px_rgba(147,51,234,0.25)]
+                     text-accent-foreground
+                     hover:shadow-[0_0_25px_rgba(147,51,234,0.35)]
+                     relative overflow-hidden group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-accent/0
+                          group-hover:translate-x-full transition-transform duration-500" />
+            <Bot className="w-5 h-5 relative z-10" />
+            <span className="font-medium relative z-10">Web Buddy AI</span>
+            {showAIPanel && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2
+                             bg-accent-foreground rounded-full animate-pulse" />
+            )}
+          </button>
+          <NavigationButton icon={Settings} label="Settings" section="settings" />
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 bg-background p-6">
+        <div className="bg-background/95 rounded-md h-full p-4
+                      border-2 border-dashed border-primary/20
+                      shadow-[0_0_30px_rgba(6,182,212,0.25)]
+                      backdrop-blur-md relative"
+             onDragOver={(e) => {
+               e.preventDefault();
+               e.dataTransfer.dropEffect = 'copy';
+               console.log('Dragging over drop zone');
+             }}
+             onDrop={handleProjectDrop}>
+          {!selectedProject ? (
+            <div className="flex items-center justify-center h-full">
+              {draggingComponent ? (
+                <div className="text-primary animate-pulse">Drop project here to preview</div>
+              ) : (
+                <div className="text-center text-primary/60">
+                  <Move className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Drag a project from the Projects menu to preview</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="h-full">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-medium text-primary">
+                  {editMode ? 'Editing:' : 'Previewing:'} {selectedProject}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditMode(!editMode)}
+                    className={`px-3 py-1 rounded-md transition-colors
+                              ${editMode
+                                ? 'bg-accent text-accent-foreground'
+                                : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+                  >
+                    {editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedProject(null);
+                      setProjectUrl(null);
+                      setPreviewError(null);
+                      setEditMode(false);
+                      if (previewRef.current) {
+                        previewRef.current.src = 'about:blank';
+                      }
+                    }}
+                    className="text-primary/60 hover:text-primary transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Close Preview
+                  </button>
+                </div>
+              </div>
+
+              <div className="w-full h-[calc(100%-3rem)] relative">
+                {isPreviewLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                )}
+
+                {previewError ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm text-destructive">
+                    {previewError}
+                  </div>
+                ) : (
+                  <div className="relative w-full h-full">
+                    <iframe
+                      ref={previewRef}
+                      className="w-full h-full rounded-md border border-primary/20"
+                      style={{
+                        pointerEvents: editMode ? 'none' : 'auto',
+                        backgroundColor: 'white'
+                      }}
+                      src={projectUrl || 'about:blank'}
+                      allow="fullscreen"
+                      sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                      onError={(e) => {
+                        console.error('Preview loading error:', e);
+                        setPreviewError('Failed to load preview. Please try again.');
+                        setIsPreviewLoading(false);
+                      }}
+                      onLoad={() => {
+                        console.log('Preview loaded successfully');
+                        setIsPreviewLoading(false);
+                        setPreviewError(null);
+                      }}
+                    />
+                    {editMode && (
+                      <div className="absolute inset-0 grid grid-rows-3 gap-2 bg-transparent"
+                           onDragOver={(e) => {
+                             e.preventDefault();
+                             const rect = e.currentTarget.getBoundingClientRect();
+                             const y = e.clientY - rect.top;
+                             const section = Math.floor(y / (rect.height / 3));
+                             setHighlightedRegion(section);
+                           }}
+                           onDragLeave={() => setHighlightedRegion(null)}
+                           onDrop={(e) => handleComponentDrop(e, draggingComponent)}
+                      >
+                        {[0, 1, 2].map((section) => (
+                          <div
+                            key={section}
+                            className={`relative ${
+                              highlightedRegion === section
+                                ? 'bg-primary/10 border-2 border-dashed border-primary/50'
+                                : 'border border-dashed border-primary/10 border-opacity-0 hover:border-opacity-100'
+                            } transition-all duration-200`}
+                          >
+                            {highlightedRegion === section && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="bg-primary/90 text-primary-foreground px-3 py-1 rounded-md shadow-lg flex items-center gap-2">
+                                  <Plus className="w-4 h-4" />
+                                  Drop component here
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Right Panel */}
+      <div
+        ref={rightResizeRef}
+        className="w-1 h-screen cursor-col-resize bg-cyan-500/20 hover:bg-cyan-400/40 transition-colors"
+        onMouseDown={(e) => {
+          const handleMouseMove = (e: MouseEvent) => handleResize(e, 'right');
+          const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          };
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+        }}
+      />
+      <div
+        className="bg-background/95 backdrop-blur-md h-screen p-6 overflow-y-auto
+                   border-l border-primary/20"
+        style={{ width: rightPanelWidth }}
+      >
+        <h2 className="text-lg font-medium text-primary mb-6
+                      [text-shadow:_0_0_10px_rgba(6,182,212,0.5)]">Tools</h2>
+
+        <div className="space-y-8">
+          {/* Tools Panel Content */}
+          <div className="p-4 rounded-md bg-background/50 border border-primary/20
+                        shadow-[0_0_15px_rgba(6,182,212,0.15)]
+                        hover:shadow-[0_0_25px_rgba(6,182,212,0.25)]
+                        transition-all duration-300">
+            <h3 className="text-sm font-medium text-primary mb-4">Color Palette</h3>
+            <div className="grid grid-cols-4 gap-2">
+              {['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFFFFF', '#000000'].map(color => (
+                <button
+                  key={color}
+                  className="w-12 h-12 rounded-md cursor-pointer transition-all duration-300
+                            hover:scale-110 shadow-[0_0_10px_rgba(6,182,212,0.25)]
+                            hover:shadow-[0_0_20px_rgba(6,182,212,0.35)]"
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-md bg-background/50 border border-primary/20
+                        shadow-[0_0_15px_rgba(6,182,212,0.15)]
+                        hover:shadow-[0_0_25px_rgba(6,182,212,0.25)]
+                        transition-all duration-300">
+            <h3 className="text-sm font-medium text-primary mb-4">Components</h3>
+            <div className="space-y-3">
+              {Object.entries(MENU_ITEMS.components).map(([componentName, subItems]) => (
+                <div key={componentName} className="relative">
+                  <button
+                    onClick={() => setActiveSubmenu(activeSubmenu === componentName ? null : componentName)}
+                    className="w-full p-3 bg-muted/50 rounded-md
+                             hover:bg-muted/60 transition-all duration-300
+                             border border-primary/20
+                             text-primary flex items-center justify-between"
+                    draggable
+                    onDragStart={() => setDraggingComponent(componentName)}
+                    onDragEnd={() => setDraggingComponent(null)}
+                  >
+                    <span>{componentName}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform duration-300 ${activeSubmenu === componentName ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+
+                  {activeSubmenu === componentName && (
+                    <div className="absolute left-0 right-0 mt-2 py-2 bg-background/95 rounded-md
+                                  border border-primary/20 shadow-[0_5px_15px_rgba(6,182,212,0.25)]
+                                  backdrop-blur-md z-20">
+                      {subItems.map((subItem, index) => (
+                        <button
+                          key={index}
+                          className="w-full px-4 py-2 text-left text-primary hover:text-primary-foreground
+                                   hover:bg-muted/50 transition-colors duration-300 text-sm
+                                   hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                          draggable
+                          onDragStart={() => setDraggingComponent(subItem)}
+                          onDragEnd={() => setDraggingComponent(null)}
+                        >
+                          {subItem}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* AI Assistant Panel - Updated styling */}
+      {showAIPanel && (
+        <div className="fixed bottom-4 right-4 w-96 z-50">
+          <div className="bg-background/95 backdrop-blur-md rounded-lg
+                       border border-accent overflow-hidden
+                       shadow-[0_8px_32px_rgba(147,51,234,0.35)]
+                       animate-in slide-in-from-bottom-4">
+            <div className="flex items-center justify-between p-3 border-b border-accent/20">
+              <h3 className="text-accent font-medium flex items-center gap-2">
+                <Bot className="w-5 h-5" />
+                Web Buddy
+              </h3>
+              <button
+                onClick={() => setShowAIPanel(false)}
+                className="p-2 hover:bg-accent/10 rounded-md
+                         text-accent/60 hover:text-accent
+                         transition-colors duration-300"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <AIAssistant />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+storage.ls:
+import { users, type User, type InsertUser, type ContentSection, type ChartData } from "@shared/schema";
+import createMemoryStore from "memorystore";
+import session from "express-session";
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
+
+const scryptAsync = promisify(scrypt);
+
+const MemoryStore = createMemoryStore(session);
+
+async function hashInitialPassword(password: string) {
+  const salt = "0123456789abcdef";
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
+
+export interface IStorage {
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  getContent(section: string): Promise<ContentSection>;
+  updateContent(section: string, content: ContentSection): Promise<void>;
+  getChartData(chartId: string): Promise<ChartData>;
+  updateChartData(chartId: string, data: ChartData): Promise<void>;
+  sessionStore: session.Store;
+}
+
+export class MemStorage implements IStorage {
+  private users: Map<number, User>;
+  private content: Map<string, ContentSection>;
+  private chartData: Map<string, ChartData>;
+  sessionStore: session.Store;
+  currentId: number;
+
+  constructor() {
+    this.users = new Map();
+    this.content = new Map();
+    this.chartData = new Map();
+    this.currentId = 1;
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000,
+    });
+
+    // Initialize admin user with simpler credentials
+    const initializeStorage = async () => {
+      const adminUser: User = {
+        id: this.currentId++,
+        username: "admin",
+        password: await hashInitialPassword("admin"), // Simpler password for development
+        email: "admin@rapidwebdev.com",
+        phoneNumber: null,
+        role: "admin"
+      };
+      this.users.set(adminUser.id, adminUser);
+      console.log("Admin user initialized with username:", adminUser.username);
+    };
+
+    // Call initialization
+    initializeStorage().catch(console.error);
+
+    // Initialize with default content
+    this.content.set('executive-summary', {
+      title: "Executive Summary",
+      content: "Pro Driver Academy (PDA) is a Wisconsin-based nonprofit organization...",
+      audioScript: "Pro Driver Academy is a Wisconsin-based nonprofit organization dedicated to addressing the critical shortage of qualified Class A Commercial Driver's License holders..."
+    });
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.username === username,
+    );
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = this.currentId++;
+    const user: User = {
+      id,
+      ...insertUser,
+      phoneNumber: insertUser.phoneNumber || null,
+      role: insertUser.role || 'viewer'
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async getContent(section: string): Promise<ContentSection> {
+    return this.content.get(section) || {
+      title: "",
+      content: "",
+      audioScript: ""
+    };
+  }
+
+  async updateContent(section: string, content: ContentSection): Promise<void> {
+    this.content.set(section, content);
+  }
+
+  async getChartData(chartId: string): Promise<ChartData> {
+    return this.chartData.get(chartId) || {
+      title: "",
+      data: [],
+      explanation: ""
+    };
+  }
+
+  async updateChartData(chartId: string, data: ChartData): Promise<void> {
+    this.chartData.set(chartId, data);
+  }
+}
+
+export const storage = new MemStorage();

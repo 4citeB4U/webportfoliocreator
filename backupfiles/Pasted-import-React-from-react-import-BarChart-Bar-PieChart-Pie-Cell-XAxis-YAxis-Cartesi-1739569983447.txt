@@ -1,0 +1,281 @@
+import React from 'react';
+import {
+  BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
+const TeamStructure = () => {
+  // Salary Budget Distribution
+  const salaryBudget = [
+    { role: 'Executive Director', allocation: 75000 },
+    { role: 'Lead Instructor', allocation: 65000 },
+    { role: 'Operations Manager', allocation: 55000 },
+    { role: 'Marketing Coordinator', allocation: 45000 },
+    { role: 'Administrative Staff', allocation: 35000 }
+  ];
+
+  // Staff Growth Projections
+  const staffGrowth = [
+    { year: '2024', instructors: 2, admin: 1, management: 2, total: 5 },
+    { year: '2025', instructors: 3, admin: 2, management: 2, total: 7 },
+    { year: '2026', instructors: 4, admin: 3, management: 3, total: 10 }
+  ];
+
+  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#a4de6c'];
+
+  return (
+    <div className="max-w-7xl mx-auto bg-white p-8">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-4">Organizational Structure</h1>
+        <h2 className="text-2xl mb-2">Pro Driver Academy</h2>
+        <p className="text-gray-600">2024-2026 Growth Plan</p>
+      </div>
+
+      {/* Leadership Structure */}
+      <section className="mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Leadership Team</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Executive Director */}
+              <div className="border rounded-lg p-6 bg-purple-50">
+                <h3 className="text-xl font-semibold mb-4">Executive Director</h3>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold mb-2">Key Responsibilities:</h4>
+                    <ul className="list-disc pl-6 text-sm">
+                      <li>Strategic planning and vision</li>
+                      <li>Board relations and governance</li>
+                      <li>Fundraising and partnerships</li>
+                      <li>Community relations</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2">Requirements:</h4>
+                    <ul className="list-disc pl-6 text-sm">
+                      <li>5+ years nonprofit leadership</li>
+                      <li>Strong fundraising background</li>
+                      <li>Transportation industry knowledge</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Director of Training */}
+              <div className="border rounded-lg p-6 bg-blue-50">
+                <h3 className="text-xl font-semibold mb-4">Director of Training</h3>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold mb-2">Key Responsibilities:</h4>
+                    <ul className="list-disc pl-6 text-sm">
+                      <li>Curriculum development</li>
+                      <li>Instructor supervision</li>
+                      <li>Training quality assurance</li>
+                      <li>Student assessment</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2">Requirements:</h4>
+                    <ul className="list-disc pl-6 text-sm">
+                      <li>Valid CDL with all endorsements</li>
+                      <li>5+ years training experience</li>
+                      <li>DOT compliance expertise</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Operations Manager */}
+              <div className="border rounded-lg p-6 bg-green-50">
+                <h3 className="text-xl font-semibold mb-4">Operations Manager</h3>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold mb-2">Key Responsibilities:</h4>
+                    <ul className="list-disc pl-6 text-sm">
+                      <li>Daily operations oversight</li>
+                      <li>Facility management</li>
+                      <li>Regulatory compliance</li>
+                      <li>Budget management</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2">Requirements:</h4>
+                    <ul className="list-disc pl-6 text-sm">
+                      <li>3+ years operations management</li>
+                      <li>Budget management experience</li>
+                      <li>Strong organizational skills</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Core Staff Structure */}
+      <section className="mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Core Staff Positions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* CDL Instructors */}
+              <div className="border rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3">CDL Instructors</h3>
+                <ul className="list-disc pl-6 text-sm">
+                  <li>Valid CDL license</li>
+                  <li>5+ years driving experience</li>
+                  <li>Teaching certification</li>
+                  <li>Clean driving record</li>
+                  <li>DOT medical certification</li>
+                </ul>
+              </div>
+
+              {/* Marketing Coordinator */}
+              <div className="border rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3">Marketing Coordinator</h3>
+                <ul className="list-disc pl-6 text-sm">
+                  <li>Digital marketing skills</li>
+                  <li>Content creation</li>
+                  <li>Community outreach</li>
+                  <li>Event planning</li>
+                  <li>Social media management</li>
+                </ul>
+              </div>
+
+              {/* Administrative Assistant */}
+              <div className="border rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3">Administrative Assistant</h3>
+                <ul className="list-disc pl-6 text-sm">
+                  <li>Student registration</li>
+                  <li>Records management</li>
+                  <li>Office administration</li>
+                  <li>Basic accounting</li>
+                  <li>Customer service</li>
+                </ul>
+              </div>
+
+              {/* Student Services Coordinator */}
+              <div className="border rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3">Student Services Coordinator</h3>
+                <ul className="list-disc pl-6 text-sm">
+                  <li>Career counseling</li>
+                  <li>Job placement assistance</li>
+                  <li>Student support</li>
+                  <li>Industry networking</li>
+                  <li>Alumni relations</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Budget Allocation */}
+      <section className="mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Salary Budget Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-96">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={salaryBudget}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name} ($${value.toLocaleString()})`}
+                    outerRadius={150}
+                    fill="#8884d8"
+                    dataKey="allocation"
+                  >
+                    {salaryBudget.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Growth Projections */}
+      <section className="mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Staff Growth Projections</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-96">
+              <ResponsiveContainer>
+                <BarChart data={staffGrowth}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="year" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="instructors" name="Instructors" fill="#8884d8" />
+                  <Bar dataKey="admin" name="Administrative" fill="#82ca9d" />
+                  <Bar dataKey="management" name="Management" fill="#ffc658" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Training & Development */}
+      <section className="mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Training & Development Plan</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="border-b pb-4">
+                <h4 className="font-semibold mb-2">Initial Training</h4>
+                <ul className="list-disc pl-6 text-sm">
+                  <li>DOT regulations and compliance</li>
+                  <li>Safety protocols and procedures</li>
+                  <li>Teaching methodology (for instructors)</li>
+                  <li>Student management systems</li>
+                </ul>
+              </div>
+
+              <div className="border-b pb-4">
+                <h4 className="font-semibold mb-2">Ongoing Development</h4>
+                <ul className="list-disc pl-6 text-sm">
+                  <li>Quarterly safety refreshers</li>
+                  <li>Annual compliance updates</li>
+                  <li>Professional certification support</li>
+                  <li>Leadership development programs</li>
+                </ul>
+              </div>
+
+              <div className="pb-4">
+                <h4 className="font-semibold mb-2">Career Advancement</h4>
+                <ul className="list-disc pl-6 text-sm">
+                  <li>Clear promotion pathways</li>
+                  <li>Skill development opportunities</li>
+                  <li>Cross-training programs</li>
+                  <li>Industry certification support</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    </div>
+  );
+};
+
+export default TeamStructure;

@@ -1,44 +1,61 @@
 # Dependencies
-node_modules
-.pnp
-.pnp.js
-
-# Build outputs
-dist
-build
-server/public
-
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Logs
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+
+# Editor directories and files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
 *.log
 
-# Editor/IDE
-.vscode
-.idea
-*.swp
-*.swo
-.DS_Store
-
-# TypeScript
-*.tsbuildinfo
-vite.config.ts.*
-
-# Replit specific
-.replit
-replit.nix
-.breakpoints
-.config
+# Testing
+coverage/
 
 # Misc
-*.tar.gz
-.cache
-coverage
+.cache/
+.temp/
+.tmp/
+*.bak
+*.backup
+*.old
+.metadata
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
